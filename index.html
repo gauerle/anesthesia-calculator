@@ -693,7 +693,7 @@
     <div class="important-admonition">
       <div class="important-content">
         <div class="important-title">Important</div>
-        <p style="text-align: justify;">This calculator provides guidance based on published recommendations<sup>1</sup>. Always double check and err on the side of caution. The maximum recommended doses displayed are for otherwise healthy adults. For patients with the following conditions, dose reductions may be necessary:</p>
+        <p style="text-align: justify;">This calculator provides guidance based on published recommendations<sup>1, 2</sup>. Always double check and err on the side of caution. Clinical judgment by a physician is required in every situation. The user assumes all responsibility for decisions made with the information provided by this app. The maximum recommended doses displayed are for otherwise healthy adults. For patients with the following conditions, dose reductions may be necessary<sup>3</sup>:</p>
         <ul style="margin-left: 20px; margin-bottom: 10px; margin-top: 10px;">
           <li>Age Extremes (< 4 months or > 70 years)</li>
           
@@ -771,6 +771,7 @@
       <ol>
         <li><a href="https://www.jaad.org/article/S0190-9622%2816%2900074-8/fulltext" target="_blank" rel="noopener noreferrer">Kouba DJ, LoPiccolo MC, Alam M, et al. Guidelines for the use of local anesthesia in office-based dermatologic surgery. J Am Acad Dermatol. 2016;74(6):1201-1219.</a></li>
         <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6635186/" target="_blank" rel="noopener noreferrer">Budney SM, Holcombe TC. A Visual Method for the Safe Administration of Multiple Local Anesthetics. Plast Reconstr Surg Glob Open. 2019;7(6):e2294.</a></li>
+        <li><a href="https://pubmed.ncbi.nlm.nih.gov/15635516/" target="_blank" rel="noopener noreferrer">Rosenberg PH, Veering BT, Urmey WF. Maximum recommended doses of local anesthetics: a multifactorial concept. Reg Anesth Pain Med. 2004;29(6):564-524. doi:10.1016/j.rapm.2004.08.003</a></li>
       </ol>
     </div>
   </div>
@@ -927,7 +928,18 @@
         });
         
         window.addEventListener('resize', () => {
-          if (this.state.chartInstance) this.debouncedCalculate();
+          // Store previous dimensions to detect meaningful changes
+          if (!this.prevWidth) {
+            this.prevWidth = window.innerWidth;
+            return;
+          }
+          
+          // Only redraw chart if width changed by at least 5px
+          const widthDiff = Math.abs(window.innerWidth - this.prevWidth);
+          if (widthDiff > 5 && this.state.chartInstance) {
+            this.prevWidth = window.innerWidth;
+            this.debouncedCalculate();
+          }
         });
       }
       
