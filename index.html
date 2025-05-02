@@ -90,13 +90,6 @@
       transition: all 0.2s ease;
     }
     
-    @media (max-width: 768px) {
-      .unit-button {
-        padding: 8px 10px;
-        font-size: var(--font-size-sm);
-      }
-    }
-    
     .unit-button.active {
       background-color: var(--color-primary);
       color: white;
@@ -141,12 +134,6 @@
       appearance: none;
     }
     
-    @media (max-width: 768px) {
-      #weight {
-        max-width: 120px;
-      }
-    }
-    
     select {
       background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%230072B2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
       background-repeat: no-repeat;
@@ -172,7 +159,7 @@
         padding: 0;
         margin: var(--spacing-md) 0;
     }
-        
+    
     .result-card {
         background-color: white;
         border-radius: 12px;
@@ -196,16 +183,6 @@
         margin-right: 16px;
         margin-bottom: 8px;
         padding-left: 0;
-    }
-    
-    @media (max-width: 480px) {
-        .card-title {
-            flex-wrap: wrap;
-        }
-        
-        .agent-label {
-            margin-bottom: 4px;
-        }
     }
     
     .agent-label {
@@ -291,22 +268,6 @@
         font-weight: bold;
         opacity: 0.5;
     }
-    
-    @media (max-width: 768px) {
-      .card-content {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      
-      .card-title {
-        margin-bottom: 12px;
-        width: 100%;
-      }
-      
-      .metric-container {
-        width: 100%;
-      }
-    }
 
     .error-message {
       color: var(--color-danger);
@@ -317,25 +278,49 @@
       background-color: rgba(213, 94, 0, 0.1);
     }
 
+    .important-admonition, .warning-admonition {
+      display: flex;
+      margin: var(--spacing-lg) 0;
+      padding: var(--spacing-md);
+      border-radius: var(--border-radius);
+      color: var(--color-text);
+    }
+    
     .important-admonition {
-    display: flex;
-    margin: var(--spacing-lg) 0;
-    padding: var(--spacing-md);
-    border: 1px solid var(--color-warning);
-    background: linear-gradient(to bottom right, rgba(204, 121, 167, 0.1), rgba(204, 121, 167, 0));
-    border-radius: var(--border-radius);
-    color: var(--color-text);
-  }
-  
-  .important-content {
-    flex: 1;
-  }
-  
-  .important-title {
-    font-weight: 600;
-    color: var(--color-warning);
-    margin-bottom: var(--spacing-xs);
-  }
+      border: 1px solid var(--color-warning);
+      background: linear-gradient(to bottom right, rgba(204, 121, 167, 0.1), rgba(204, 121, 167, 0));
+    }
+    
+    .warning-admonition {
+      border: 1px solid var(--color-danger);
+      background: linear-gradient(to bottom right, rgba(213, 94, 0, 0.1), rgba(213, 94, 0, 0));
+    }
+    
+    .important-content, .warning-content {
+      flex: 1;
+    }
+    
+    .important-title, .warning-title {
+      font-weight: 600;
+      margin-bottom: var(--spacing-xs);
+    }
+    
+    .important-title {
+      color: var(--color-warning);
+    }
+    
+    .warning-content p:first-of-type {
+      text-indent: 2em;
+    }
+    
+    .warning-content p {
+      margin-bottom: var(--spacing-xs);
+      text-align: justify;
+    }
+    
+    .warning-title {
+      color: var(--color-danger);
+    }
 
     .disclaimer-section {
         font-size: var(--font-size-base);
@@ -497,6 +482,48 @@
         width: 100%;
         margin-right: 0;
       }
+      
+      .unit-button {
+        padding: 8px 10px;
+        font-size: var(--font-size-sm);
+      }
+      
+      #weight {
+        max-width: 120px;
+      }
+      
+      .card-content {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .card-title {
+        margin-bottom: 12px;
+        width: 100%;
+      }
+      
+      .metric-container {
+        width: 100%;
+      }
+      
+      .card-title {
+        flex-wrap: wrap;
+      }
+      
+      .agent-label {
+        margin-bottom: 4px;
+      }
+    }
+
+    @media (min-width: 769px) {
+      #results {
+        display: flex;
+        gap: var(--spacing-md);
+      }
+      
+      .result-column {
+        flex: 1;
+      }
     }
 
     *:focus-visible {
@@ -624,10 +651,12 @@
         </div>
     </div>
 
-    <div>
-      <h3>Local Anesthetic Systemic Toxicity (LAST)</h3>
-      <p>LAST is a rare but potentially life-threatening event resulting from systemic absorption of local anesthetic agents. Clinicians must be vigilant for early signs and symptoms, which can progress rapidly. Initial manifestations often involve the central nervous system, including circumoral numbness, metallic taste, lightheadedness, visual and auditory disturbances, and anxiety. This can be followed by more severe CNS toxicity such as drowsiness, slurred speech, muscle twitching, and ultimately, seizures. Cardiovascular involvement may present with hypertension and tachycardia initially, followed by hypotension, bradycardia, various arrhythmias, and potentially cardiac arrest.</p>
-      <p>This calculator provides guidance on maximum recommended dosages based on established guidelines and patient factors. However, it is the sole responsibility of the administering physician to carefully consider individual patient characteristics, employ meticulous injection techniques, and continuously monitor for any signs or symptoms of LAST throughout the procedure and immediate post-procedural period. Prompt recognition and appropriate management, including immediate cessation of local anesthetic administration and adherence to established treatment protocols, are critical in mitigating the risks associated with LAST.</p>
+    <div class="warning-admonition">
+      <div class="warning-content">
+        <div class="warning-title">Local Anesthetic Systemic Toxicity (LAST)</div>
+        <p>LAST is a rare but potentially life-threatening event resulting from systemic absorption of local anesthetic agents. Clinicians must be vigilant for early signs and symptoms, which can progress rapidly. Initial manifestations often involve the central nervous system, including circumoral numbness, metallic taste, lightheadedness, visual and auditory disturbances, and anxiety. This can be followed by more severe CNS toxicity such as drowsiness, slurred speech, muscle twitching, and ultimately, seizures. Cardiovascular involvement may present with hypertension and tachycardia initially, followed by hypotension, bradycardia, various arrhythmias, and potentially cardiac arrest.</p>
+        <p>This calculator provides guidance on maximum recommended dosages based on established guidelines and patient factors. However, it is the sole responsibility of the administering physician to carefully consider individual patient characteristics, employ meticulous injection techniques, and continuously monitor for any signs or symptoms of LAST throughout the procedure and immediate post-procedural period. Prompt recognition and appropriate management, including immediate cessation of local anesthetic administration and adherence to established treatment protocols, are critical in mitigating the risks associated with LAST.</p>
+      </div>
     </div>
 
     <div class="references">
@@ -642,8 +671,6 @@
   <script>
     // Define anesthetic agents data outside the class
     const ANESTHETIC_AGENTS = [
-      { name: "Lidocaine 0.1% (no liposuction)", maxMgKg: 28, maxTotalMg: 300, concentration: 0.1 },
-      { name: "Lidocaine 0.1% (with liposuction)", maxMgKg: 55, maxTotalMg: 300, concentration: 0.1 },
       { name: "Lidocaine 0.5%", maxMgKg: 5, maxTotalMg: 300, concentration: 0.5 },
       { name: "Lidocaine 1%", maxMgKg: 5, maxTotalMg: 300, concentration: 1 },
       { name: "Lidocaine 2%", maxMgKg: 5, maxTotalMg: 300, concentration: 2 },
@@ -690,12 +717,8 @@
       constructor() {
         this.SYRINGE_VOLUME = 3;
         this.DEBOUNCE_DELAY = 300;
-        
-        // Use the globally defined agents data
         this.agents = ANESTHETIC_AGENTS;
-        
         this.elements = this.cacheElements();
-        
         this.state = {
           weight: 70,
           weightUnit: 'kg',
@@ -706,11 +729,9 @@
           debounceTimer: null,
           isCalculating: false
         };
-        
         this.init();
       }
       
-      // Simplified element caching
       cacheElements() {
         const elements = {};
         [
@@ -729,10 +750,16 @@
         return elements;
       }
       
-      // Initialize the calculator
       init() {
         if (typeof Chart === 'undefined') {
-          this.loadChartJs();
+          const scriptEl = document.createElement('script');
+          scriptEl.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+          scriptEl.onload = () => this.init();
+          scriptEl.onerror = () => {
+            this.showError('Failed to load Chart.js. The calculator will provide numerical results without visualization.');
+            this.calculateDoses();
+          };
+          document.head.appendChild(scriptEl);
           return;
         }
         
@@ -742,27 +769,12 @@
         this.calculateDoses();
       }
       
-      // Load Chart.js if not available
-      loadChartJs() {
-        const scriptEl = document.createElement('script');
-        scriptEl.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
-        scriptEl.onload = () => this.init();
-        scriptEl.onerror = () => {
-          this.showError('Failed to load Chart.js. The calculator will provide numerical results without visualization.');
-          this.calculateDoses();
-        };
-        document.head.appendChild(scriptEl);
-      }
-      
-      // Populate agent dropdowns
       populateAgentSelectors() {
         const { agent1, agent2 } = this.elements;
         
-        // Clear existing options
         agent1.innerHTML = '';
         agent2.innerHTML = '';
         
-        // Populate dropdowns
         this.agents.forEach(agent => {
           if (agent.name !== "None") {
             agent1.appendChild(new Option(agent.name, agent.name));
@@ -770,71 +782,58 @@
           agent2.appendChild(new Option(agent.name, agent.name));
         });
         
-        // Set values from state
         agent1.value = this.state.agent1;
         agent2.value = this.state.agent2;
         
         this.updateAgent2DoseVisibility();
       }
       
-      // Simplified event listener setup
       setupEventListeners() {
-        // Standard input handlers for weight, agent1, and plannedDose2
         [this.elements.weight, this.elements.agent1, this.elements.plannedDose2].forEach(el => 
           el.addEventListener('input', () => this.debouncedCalculate())
         );
         
-        // Validation
         [this.elements.weight, this.elements.plannedDose2].forEach(el => 
           el.addEventListener('invalid', e => e.preventDefault())
         );
         
-        // Handle agent2 change separately for visibility update
         this.elements.agent2.addEventListener('change', () => {
           this.updateAgent2DoseVisibility();
           this.debouncedCalculate();
         });
         
-        // Weight unit toggle
         [this.elements.kgButton, this.elements.lbsButton].forEach(button => 
           button.addEventListener('click', () => this.setWeightUnit(button.dataset.unit))
         );
         
-        // Form submit
         this.elements['calculator-form'].addEventListener('submit', e => {
           e.preventDefault();
           if (this.updateState()) this.calculateDoses();
         });
         
-        // Redraw chart on window resize
         window.addEventListener('resize', () => {
           if (this.state.chartInstance) this.debouncedCalculate();
         });
       }
       
-      // Toggle visibility of second agent dose input
       updateAgent2DoseVisibility() {
         this.elements.agent2DoseGroup.style.display = 
           this.elements.agent2.value === 'None' ? 'none' : 'block';
       }
       
-      // Update state from input values and validate
       updateState() {
         const { weight, plannedDose2, agent1, agent2, weightUnit } = this.elements;
         const weightValue = parseFloat(weight.value);
         const dose2Value = parseFloat(plannedDose2.value);
         
-        // Validate weight
         const isWeightValid = weightValue > 0 && !isNaN(weightValue);
         weight.classList.toggle('invalid-input', !isWeightValid);
         if (isWeightValid) this.state.weight = weightValue;
         
-        // Validate planned dose
         const isDoseValid = dose2Value >= 0 && !isNaN(dose2Value);
         plannedDose2.classList.toggle('invalid-input', !isDoseValid);
         if (isDoseValid) this.state.plannedDose2 = dose2Value;
         
-        // Update selected agents and weight unit
         this.state.agent1 = agent1.value;
         this.state.agent2 = agent2.value;
         this.state.weightUnit = weightUnit.value;
@@ -842,25 +841,21 @@
         return isWeightValid && isDoseValid;
       }
       
-      // Set weight unit and update UI
       setWeightUnit(unit) {
         const { kgButton, lbsButton, weightUnit } = this.elements;
         
-        // Update aria states and classes
         [kgButton, lbsButton].forEach(button => {
           const isActive = button.dataset.unit === unit;
           button.setAttribute('aria-pressed', isActive);
           button.classList.toggle('active', isActive);
         });
         
-        // Update state
         weightUnit.value = unit;
         this.state.weightUnit = unit;
         
         this.debouncedCalculate();
       }
       
-      // Debounce calculation for better performance
       debouncedCalculate() {
         if (this.state.debounceTimer) {
           clearTimeout(this.state.debounceTimer);
@@ -879,23 +874,18 @@
         }, this.DEBOUNCE_DELAY);
       }
       
-      // Get weight in kg regardless of input unit
       getWeightKg() {
-        return this.state.weightUnit === 'kg' ? 
-          this.state.weight : this.state.weight / 2.20462;
+        return this.state.weightUnit === 'kg' ? this.state.weight : this.state.weight / 2.20462;
       }
       
-      // Get agent data by name
       getAgentByName(name) {
         return this.agents.find(a => a.name === name) || null;
       }
       
-      // Show error message
       showError(message) {
         this.elements.results.innerHTML = `<div class="error-message" role="alert">${message}</div>`;
       }
       
-      // Format number with consistent decimal places
       formatNumber(num) {
         return num.toLocaleString('en-US', { 
           minimumFractionDigits: 1, 
@@ -903,17 +893,14 @@
         });
       }
       
-      // Calculate maximum dose
       calculateMaxDose(agent, weight) {
         return Math.min(weight * agent.maxMgKg, agent.maxTotalMg);
       }
       
-      // Calculate maximum volume
       calculateMaxVolume(agent, maxMg) {
         return agent.concentration > 0 ? maxMg / (10 * agent.concentration) : 0;
       }
       
-      // Reset chart instance
       resetChart() {
         if (this.state.chartInstance) {
           this.state.chartInstance.destroy();
@@ -921,14 +908,6 @@
         }
       }
       
-      // Handle calculation errors
-      handleCalculationError(error) {
-        console.error('Calculation error:', error);
-        const errorMessage = error.message || 'Please check your inputs.';
-        this.showError(`Error calculating doses: ${errorMessage}`);
-      }
-      
-      // Create chart base options
       getChartBaseOptions(isMobile = window.innerWidth < 768) {
         const textColor = getComputedStyle(document.documentElement).getPropertyValue('--color-text');
         
@@ -965,7 +944,6 @@
         };
       }
       
-      // Get scale options helper 
       getScaleOptions(title, max, isMobile = window.innerWidth < 768) {
         return {
           title: { 
@@ -981,7 +959,6 @@
         };
       }
       
-      // Update chart with data
       updateChart(chartData) {
         try {
           this.resetChart();
@@ -991,7 +968,6 @@
           const baseOptions = this.getChartBaseOptions();
           const { type, options, data } = chartData;
           
-          // Merge options with deep nested properties handled correctly
           const mergedOptions = {
             ...baseOptions,
             ...options,
@@ -1028,7 +1004,6 @@
         }
       }
       
-      // Create single agent chart configuration
       createSingleAgentChartConfig(agent, maxMl) {
         const isMobile = window.innerWidth < 768;
         
@@ -1059,11 +1034,9 @@
         };
       }
       
-      // Create combination chart configuration
       createCombinationChartConfig(agent1, agent2, maxMl1, maxMl2, plannedDose2, plannedRemainingMl1) {
         const isMobile = window.innerWidth < 768;
         
-        // Generate plot data
         const interpolatedData = Array.from(
           {length: Math.ceil(maxMl2) + 1}, 
           (_, x) => ({x, y: Math.max(0, maxMl1 - (maxMl1 / maxMl2) * x)})
@@ -1144,21 +1117,71 @@
         };
       }
       
-      // Generate HTML for result card
-      generateAgentCard(name, maxMg, maxMl, syringes, cardClass, info = '') {
-        const cardLabels = {
-          'primary-agent': 'FIRST AGENT',
-          'secondary-agent': 'SECOND AGENT',
-          'remaining-agent': 'REMAINING'
-        };
-        
-        const label = cardLabels[cardClass] || 'AGENT';
-        
-        return `
-          <div class="result-card ${cardClass}">
+      generateCombinedPrimaryCard(name, maxMg, maxMl, syringes, remainingInfo = null) {
+        let html = `
+          <div class="result-card primary-agent">
             <div class="card-content">
               <div class="card-title">
-                <span class="agent-label">${label}</span>
+                <span class="agent-label">FIRST AGENT</span>
+                <span class="agent-name">${name}</span>
+              </div>
+              <div class="metric-container">
+                <div class="metric">
+                  <span class="metric-icon">💊</span>
+                  <span class="metric-value">${this.formatNumber(maxMg)} mg</span>
+                  <span class="metric-label">MAX</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-icon">💉</span>
+                  <span class="metric-value">${this.formatNumber(maxMl)} mL</span>
+                  <span class="metric-label">VOLUME</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-icon">🔄</span>
+                  <span class="metric-value">${this.formatNumber(maxMl / this.SYRINGE_VOLUME)} x ${this.SYRINGE_VOLUME}mL</span>
+                  <span class="metric-label">SYRINGE(S)</span>
+                </div>
+              </div>
+            </div>`;
+            
+        if (remainingInfo) {
+          html += `
+            <div class="info-text">${remainingInfo.info}</div>
+            <div class="card-content">
+              <div class="card-title">
+                <span class="agent-label" style="background-color: #D55E00;">REMAINING</span>
+                <span class="agent-name">${name}</span>
+              </div>
+              <div class="metric-container">
+                <div class="metric">
+                  <span class="metric-icon">💊</span>
+                  <span class="metric-value">${this.formatNumber(remainingInfo.maxMg)} mg</span>
+                  <span class="metric-label">REMAINING</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-icon">💉</span>
+                  <span class="metric-value">${this.formatNumber(remainingInfo.maxMl)} mL</span>
+                  <span class="metric-label">VOLUME</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-icon">🔄</span>
+                  <span class="metric-value">${this.formatNumber(remainingInfo.maxMl / this.SYRINGE_VOLUME)} x ${this.SYRINGE_VOLUME}mL</span>
+                  <span class="metric-label">SYRINGE(S)</span>
+                </div>
+              </div>
+            </div>`;
+        }
+        
+        html += `</div>`;
+        return html;
+      }
+      
+      generateSecondaryCard(name, maxMg, maxMl, syringes) {
+        return `
+          <div class="result-card secondary-agent">
+            <div class="card-content">
+              <div class="card-title">
+                <span class="agent-label">SECOND AGENT</span>
                 <span class="agent-name">${name}</span>
               </div>
               <div class="metric-container">
@@ -1179,73 +1202,10 @@
                 </div>
               </div>
             </div>
-            ${info ? `<div class="info-text">${info}</div>` : ''}
           </div>
         `;
       }
       
-      // Process second agent and return HTML
-      processSecondAgent(agent1, maxMg1, maxMl1, weight) {
-        const agent2 = this.getAgentByName(this.state.agent2);
-        if (!agent2 || agent2.name === "None") {
-          // Create single agent chart
-          const chartConfig = this.createSingleAgentChartConfig(agent1, maxMl1);
-          this.updateChart(chartConfig);
-          return '';
-        }
-        
-        const plannedDose2 = this.state.plannedDose2;
-        const maxMg2 = this.calculateMaxDose(agent2, weight);
-        const maxMl2 = this.calculateMaxVolume(agent2, maxMg2);
-        
-        if (maxMl2 <= 0) {
-          return `
-            <div class="error-message" role="alert">
-              Cannot calculate combination - maximum dose for ${agent2.name} is zero. Please select a different agent.
-            </div>
-          `;
-        }
-        
-        // Add second agent card
-        let html = this.generateAgentCard(
-          agent2.name, maxMg2, maxMl2, maxMl2 / this.SYRINGE_VOLUME, 'secondary-agent'
-        );
-        
-        // Calculate remaining first agent after second agent dose
-        const plannedRemainingMg1 = maxMg1 * (1 - plannedDose2 / maxMl2);
-        const plannedRemainingMl1 = this.calculateMaxVolume(agent1, plannedRemainingMg1);
-        
-        if (plannedDose2 <= maxMl2) {
-          // Add remaining agent card
-          html += this.generateAgentCard(
-            `Remaining ${agent1.name}`, 
-            plannedRemainingMg1, 
-            plannedRemainingMl1, 
-            plannedRemainingMl1 / this.SYRINGE_VOLUME, 
-            'remaining-agent',
-            `After ${this.formatNumber(plannedDose2)} mL of ${agent2.name}`
-          );
-        } else {
-          // Show error for excessive second agent dose
-          html += `
-            <div class="error-message" role="alert">
-              Planned dose of ${this.formatNumber(plannedDose2)} mL exceeds maximum dose of ${this.formatNumber(maxMl2)} mL for ${agent2.name}.
-            </div>
-          `;
-        }
-        
-        // Create combination chart
-        const chartConfig = this.createCombinationChartConfig(
-          agent1, agent2, maxMl1, maxMl2, 
-          Math.min(plannedDose2, maxMl2), 
-          Math.max(0, plannedRemainingMl1)
-        );
-        this.updateChart(chartConfig);
-        
-        return html;
-      }
-      
-      // Calculate and display dose results
       calculateDoses() {
         try {
           const weight = this.getWeightKg();
@@ -1260,22 +1220,93 @@
             return;
           }
           
-          // Calculate first agent doses
           const maxMg1 = this.calculateMaxDose(agent1, weight);
           const maxMl1 = this.calculateMaxVolume(agent1, maxMg1);
           
-          let resultsHTML = this.generateAgentCard(
-            agent1.name, maxMg1, maxMl1, maxMl1 / this.SYRINGE_VOLUME, 'primary-agent'
-          );
+          const isMobile = window.innerWidth <= 768;
+          let resultsHTML = '';
           
-          this.resetChart();
-          
-          // Process second agent if selected
-          resultsHTML += this.processSecondAgent(agent1, maxMg1, maxMl1, weight);
+          const agent2 = this.getAgentByName(this.state.agent2);
+          if (!agent2 || agent2.name === "None") {
+            const chartConfig = this.createSingleAgentChartConfig(agent1, maxMl1);
+            this.updateChart(chartConfig);
+            
+            resultsHTML = this.generateCombinedPrimaryCard(
+              agent1.name, maxMg1, maxMl1, maxMl1 / this.SYRINGE_VOLUME
+            );
+          } else {
+            const plannedDose2 = this.state.plannedDose2;
+            const maxMg2 = this.calculateMaxDose(agent2, weight);
+            const maxMl2 = this.calculateMaxVolume(agent2, maxMg2);
+            
+            if (maxMl2 <= 0) {
+              this.showError(`Cannot calculate combination - maximum dose for ${agent2.name} is zero. Please select a different agent.`);
+              return;
+            }
+            
+            const plannedRemainingMg1 = maxMg1 * (1 - plannedDose2 / maxMl2);
+            const plannedRemainingMl1 = this.calculateMaxVolume(agent1, plannedRemainingMg1);
+            
+            if (!isMobile) {
+              resultsHTML = '<div class="result-column">';
+            }
+            
+            if (plannedDose2 <= maxMl2) {
+              const remainingInfo = {
+                maxMg: plannedRemainingMg1,
+                maxMl: plannedRemainingMl1,
+                info: `After ${this.formatNumber(plannedDose2)} mL of ${agent2.name}`
+              };
+              
+              resultsHTML += this.generateCombinedPrimaryCard(
+                agent1.name, maxMg1, maxMl1, maxMl1 / this.SYRINGE_VOLUME, remainingInfo
+              );
+              
+              if (!isMobile) {
+                resultsHTML += '</div><div class="result-column">';
+              }
+              
+              resultsHTML += this.generateSecondaryCard(
+                agent2.name, maxMg2, maxMl2, maxMl2 / this.SYRINGE_VOLUME
+              );
+              
+              const chartConfig = this.createCombinationChartConfig(
+                agent1, agent2, maxMl1, maxMl2, 
+                Math.min(plannedDose2, maxMl2), 
+                Math.max(0, plannedRemainingMl1)
+              );
+              this.updateChart(chartConfig);
+              
+            } else {
+              resultsHTML += this.generateCombinedPrimaryCard(
+                agent1.name, maxMg1, maxMl1, maxMl1 / this.SYRINGE_VOLUME
+              );
+              
+              if (!isMobile) {
+                resultsHTML += '</div><div class="result-column">';
+              }
+              
+              resultsHTML += this.generateSecondaryCard(
+                agent2.name, maxMg2, maxMl2, maxMl2 / this.SYRINGE_VOLUME
+              );
+              
+              resultsHTML += `
+                <div class="error-message" role="alert">
+                  Planned dose of ${this.formatNumber(plannedDose2)} mL exceeds maximum dose of ${this.formatNumber(maxMl2)} mL for ${agent2.name}.
+                </div>
+              `;
+            }
+            
+            if (!isMobile) {
+              resultsHTML += '</div>';
+            }
+          }
           
           this.elements.results.innerHTML = resultsHTML;
         } catch (error) {
-          this.handleCalculationError(error);
+          console.error('Calculation error:', error);
+          const errorMessage = error.message || 'Please check your inputs.';
+          this.showError(`Error calculating doses: ${errorMessage}`);
         }
       }
     }
