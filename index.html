@@ -118,6 +118,27 @@
     .form-group {
       margin-bottom: var(--spacing-lg);
     }
+    
+    .input-group {
+      display: flex;
+      gap: 0;
+      max-width: 440px;
+    }
+    
+    .input-group select:first-child {
+      flex: 2;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      min-width: 250px;
+    }
+    
+    .input-group select:last-child {
+      flex: 1;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      border-left: none;
+      min-width: 120px;
+    }
 
     select, input {
       display: block;
@@ -212,9 +233,28 @@
       color: white;
     }
     
+    .buffer-label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3px 8px;
+      min-height: 20px;
+      background-color: #f0f0f0;
+      color: #555555;
+      font-size: 11px;
+      font-weight: bold;
+      border-radius: 20px;
+      margin-left: 8px;
+      letter-spacing: 0.5px;
+      text-align: center;
+      line-height: 1.2;
+    }
+    
     .agent-name {
       font-weight: bold;
       font-size: 16px;
+      display: flex;
+      align-items: center;
     }
     
     .info-text {
@@ -462,7 +502,7 @@
       100% { transform: rotate(360deg); }
     }
 
-    @media (max-width: 768px) {
+          @media (max-width: 768px) {
       .container {
         padding: var(--spacing-sm);
       }
@@ -514,6 +554,35 @@
       .agent-label {
         margin-bottom: 4px;
       }
+      
+      
+      .input-group select:first-child,
+      .input-group select:last-child {
+        width: auto; /* Use auto instead of 100% */
+        max-width: none;
+        border-radius: 0;
+      }
+      
+      /* Restore original styling for first select */
+      .input-group select:first-child {
+        flex: 2;
+        border-top-left-radius: 20px;
+        border-bottom-left-radius: 20px;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        min-width: 0; /* Allow flexbox to handle sizing */
+      }
+      
+      /* Restore original styling for second select */
+      .input-group select:last-child {
+        flex: 1;
+        border-top-right-radius: 20px;
+        border-bottom-right-radius: 20px;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-left: none;
+        min-width: 0; /* Allow flexbox to handle sizing */
+      }
     }
 
     @media (min-width: 769px) {
@@ -558,6 +627,7 @@
       <ol>
         <li>Input the patient's weight.</li>
         <li>Select the anesthetic agent(s) (select "None" for second agent if using only one).</li>
+        <li>Optionally select a buffer ratio for each agent (NaHCO₃ buffering).</li>
         <li>If using a second agent, input the estimated dose.</li>
       </ol>
     </div>
@@ -575,15 +645,40 @@
         <input type="hidden" id="weightUnit" value="kg">
       </div>
 
-      <div class="form-group">
-        <label for="agent1">First Agent</label>
-        <select id="agent1" aria-label="First anesthetic agent" required></select>
-      </div>
 
-      <div class="form-group">
-        <label for="agent2">Second Agent</label>
-        <select id="agent2" aria-label="Second anesthetic agent"></select>
-      </div>
+<!-- First Agent Form Group -->
+<div class="form-group">
+  <div style="display: flex; max-width: 440px;">
+    <label for="agent1" style="flex: 2; min-width: 250px;">First Agent</label>
+    <label for="buffer1" style="flex: 1; min-width: 120px; margin-left: -50px;">Buffer</label>
+  </div>
+  <div class="input-group">
+    <select id="agent1" aria-label="First anesthetic agent" required></select>
+    <select id="buffer1" aria-label="Buffer ratio for first agent">
+      <option value="none">None</option>
+      <option value="3:1">3:1 NaHCO₃</option>
+      <option value="9:1">9:1 NaHCO₃</option>
+      <option value="10:1">10:1 NaHCO₃</option>
+    </select>
+  </div>
+</div>
+
+<!-- Second Agent Form Group -->
+<div class="form-group">
+  <div style="display: flex; max-width: 440px;">
+    <label for="agent2" style="flex: 2; min-width: 250px;">Second Agent</label>
+    <label for="buffer2" style="flex: 1; min-width: 120px; margin-left: -50px;">Buffer</label>
+  </div>
+  <div class="input-group">
+    <select id="agent2" aria-label="Second anesthetic agent"></select>
+    <select id="buffer2" aria-label="Buffer ratio for second agent">
+      <option value="none">None</option>
+      <option value="3:1">3:1 NaHCO₃</option>
+      <option value="9:1">9:1 NaHCO₃</option>
+      <option value="10:1">10:1 NaHCO₃</option>
+    </select>
+  </div>
+</div>
 
       <div class="form-group" id="agent2DoseGroup">
         <label for="plannedDose2">Planned Dose of Second Agent (mL)</label>
@@ -596,11 +691,22 @@
       <div class="loading" role="status" aria-label="Calculating dosages"></div>
     </div>
     <div class="important-admonition">
-        <div class="important-content">
-          <div class="important-title">Important</div>
-          <p>This calculator provides guidance based on published recommendations<sup>1</sup>. Always double check and err on the side of caution.</p>
-        </div>
+      <div class="important-content">
+        <div class="important-title">Important</div>
+        <p style="text-align: justify;">This calculator provides guidance based on published recommendations<sup>1</sup>. Always double check and err on the side of caution. The maximum recommended doses displayed are for otherwise healthy adults. For patients with the following conditions, dose reductions may be necessary:</p>
+        <ul style="margin-left: 20px; margin-bottom: 10px; margin-top: 10px;">
+          <li>Age Extremes (< 4 months or > 70 years)</li>
+          
+          <li>Severe Renal Dysfunction</li>
+          
+          <li>Hepatic Dysfunction</li>
+          
+          <li>Advanced Heart Failure</li>
+          
+          <li>Pregnancy</li>
+        </ul>
       </div>
+    </div>
 
     <h2>Adjusted maximum doses of local anesthetic combination</h2>
     <div>
@@ -691,10 +797,10 @@
       { name: "Mepivacaine 1%", maxMgKg: 6, maxTotalMg: 400, concentration: 1 },
       { name: "Mepivacaine 2%", maxMgKg: 6, maxTotalMg: 400, concentration: 2 },
       { name: "Mepivacaine 1% with epi", maxMgKg: 7, maxTotalMg: 550, concentration: 1 },
-      { name: "Mepivacaine 2% with epi", maxMgKg: 7, maxTotalMg: 450, concentration: 2 },
+      { name: "Mepivacaine 2% with epi", maxMgKg: 7, maxTotalMg: 550, concentration: 2 },
       { name: "Prilocaine 0.5%", maxMgKg: 7, maxTotalMg: 400, concentration: 0.5 },
-      { name: "Prilocaine 1%", maxMgKg: 10, maxTotalMg: 600, concentration: 1 },
-      { name: "Prilocaine 0.5% with epi", maxMgKg: 10, maxTotalMg: 500, concentration: 0.5 },
+      { name: "Prilocaine 1%", maxMgKg: 10, maxTotalMg: 400, concentration: 1 },
+      { name: "Prilocaine 0.5% with epi", maxMgKg: 10, maxTotalMg: 600, concentration: 0.5 },
       { name: "Prilocaine 1% with epi", maxMgKg: 10, maxTotalMg: 600, concentration: 1 },
       { name: "None", maxMgKg: 0, maxTotalMg: 0, concentration: 0 }
     ];
@@ -724,7 +830,9 @@
           weight: 70,
           weightUnit: 'kg',
           agent1: 'Lidocaine 0.5% with epi',
+          buffer1: 'none',
           agent2: 'Bupivacaine 0.5% with epi',
+          buffer2: 'none',
           plannedDose2: 6,
           chartInstance: null,
           debounceTimer: null,
@@ -736,7 +844,7 @@
       cacheElements() {
         const elements = {};
         [
-          'weight', 'weightUnit', 'agent1', 'agent2', 'plannedDose2', 
+          'weight', 'weightUnit', 'agent1', 'buffer1', 'agent2', 'buffer2', 'plannedDose2', 
           'agent2DoseGroup', 'results', 'doseChart', 'calculator-form',
           'kgButton', 'lbsButton'
         ].forEach(id => {
@@ -790,7 +898,13 @@
       }
       
       setupEventListeners() {
-        [this.elements.weight, this.elements.agent1, this.elements.plannedDose2].forEach(el => 
+        [
+          this.elements.weight, 
+          this.elements.agent1, 
+          this.elements.buffer1,
+          this.elements.buffer2,
+          this.elements.plannedDose2
+        ].forEach(el => 
           el.addEventListener('input', () => this.debouncedCalculate())
         );
         
@@ -823,7 +937,7 @@
       }
       
       updateState() {
-        const { weight, plannedDose2, agent1, agent2, weightUnit } = this.elements;
+        const { weight, plannedDose2, agent1, buffer1, agent2, buffer2, weightUnit } = this.elements;
         const weightValue = parseFloat(weight.value);
         const dose2Value = parseFloat(plannedDose2.value);
         
@@ -836,7 +950,9 @@
         if (isDoseValid) this.state.plannedDose2 = dose2Value;
         
         this.state.agent1 = agent1.value;
+        this.state.buffer1 = buffer1.value;
         this.state.agent2 = agent2.value;
+        this.state.buffer2 = buffer2.value;
         this.state.weightUnit = weightUnit.value;
         
         return isWeightValid && isDoseValid;
@@ -900,6 +1016,24 @@
       
       calculateMaxVolume(agent, maxMg) {
         return agent.concentration > 0 ? maxMg / (10 * agent.concentration) : 0;
+      }
+      
+      // New function to calculate adjusted volume based on buffer
+      calculateBufferedVolume(maxMl, bufferRatio) {
+        if (bufferRatio === 'none') {
+          return maxMl;
+        }
+        
+        // Extract the numerical ratio from the buffer option
+        const ratio = parseInt(bufferRatio.split(':')[0], 10);
+        
+        // Calculate the total volume with buffer
+        // For a 10:1 ratio, each 10mL of anesthetic gets 1mL of buffer
+        // So for X mL of anesthetic, we add X/ratio mL of buffer
+        const bufferVolume = maxMl / ratio;
+        
+        // Return the total volume (anesthetic + buffer)
+        return maxMl + bufferVolume;
       }
       
       resetChart() {
@@ -1005,20 +1139,43 @@
         }
       }
       
-      createSingleAgentChartConfig(agent, maxMl) {
+      getBufferLabel(bufferRatio) {
+        return bufferRatio === 'none' ? '' : ` (${bufferRatio} NaHCO₃)`;
+      }
+      
+      getBufferDisplayName(agentName, bufferRatio) {
+        return agentName + (bufferRatio === 'none' ? '' : ` + NaHCO₃ ${bufferRatio}`);
+      }
+      
+      createSingleAgentChartConfig(agent, maxMl, bufferRatio, bufferedMaxMl) {
         const isMobile = window.innerWidth < 768;
+        const hasBuffer = bufferRatio !== 'none';
+        
+        const datasets = [{
+          label: `${agent.name} Maximum Dose`,
+          data: [maxMl],
+          backgroundColor: 'rgba(0, 114, 178, 0.7)',
+          borderColor: '#0072B2',
+          borderWidth: 1
+        }];
+        
+        if (hasBuffer) {
+          datasets[0].label = `${agent.name} Base Volume`;
+          
+          datasets.push({
+            label: `${agent.name} + Buffer (${bufferRatio})`,
+            data: [bufferedMaxMl],
+            backgroundColor: 'rgba(0, 158, 115, 0.7)',
+            borderColor: '#009E73',
+            borderWidth: 1
+          });
+        }
         
         return {
           type: 'bar',
           data: {
             labels: ['Maximum Dose'],
-            datasets: [{
-              label: `${agent.name} Maximum Dose`,
-              data: [maxMl],
-              backgroundColor: 'rgba(0, 114, 178, 0.7)',
-              borderColor: '#0072B2',
-              borderWidth: 1
-            }]
+            datasets: datasets
           },
           options: {
             plugins: {
@@ -1029,56 +1186,107 @@
               }
             },
             scales: {
-              y: this.getScaleOptions('Volume (mL)', maxMl, isMobile)
+              y: this.getScaleOptions('Volume (mL)', hasBuffer ? bufferedMaxMl : maxMl, isMobile)
             }
           }
         };
       }
       
-      createCombinationChartConfig(agent1, agent2, maxMl1, maxMl2, plannedDose2, plannedRemainingMl1) {
+      createCombinationChartConfig(agent1, agent2, maxMl1, maxMl2, plannedDose2, plannedRemainingMl1, buffer1, buffer2, bufferedMaxMl1, bufferedMaxMl2, bufferedPlannedDose2) {
         const isMobile = window.innerWidth < 768;
+        const hasBuffer1 = buffer1 !== 'none';
+        const hasBuffer2 = buffer2 !== 'none';
         
+        // Calculate the ratio between base volume and max dose
+        const ratio = maxMl1 / maxMl2;
+        
+        // Generate data points for the curve (base volumes)
         const interpolatedData = Array.from(
           {length: Math.ceil(maxMl2) + 1}, 
-          (_, x) => ({x, y: Math.max(0, maxMl1 - (maxMl1 / maxMl2) * x)})
+          (_, x) => ({x, y: Math.max(0, maxMl1 - ratio * x)})
         );
+        
+        // If using buffers, calculate the corresponding buffered values
+        let bufferedInterpolatedData = [];
+        if (hasBuffer1 || hasBuffer2) {
+          const bufferRatio1 = hasBuffer1 ? parseInt(buffer1.split(':')[0], 10) : null;
+          const bufferRatio2 = hasBuffer2 ? parseInt(buffer2.split(':')[0], 10) : null;
+          
+          bufferedInterpolatedData = interpolatedData.map(point => {
+            const x = hasBuffer2 ? point.x * (1 + 1/bufferRatio2) : point.x;
+            const y = hasBuffer1 ? point.y * (1 + 1/bufferRatio1) : point.y;
+            return {x, y};
+          });
+        }
+        
+        const agent1Name = this.getBufferDisplayName(agent1.name, buffer1);
+        const agent2Name = this.getBufferDisplayName(agent2.name, buffer2);
+        
+        const datasets = [
+          {
+            label: isMobile ? `${agent1.name} Remaining` : `${agent1.name} Remaining vs ${agent2.name} Used`,
+            data: interpolatedData,
+            showLine: true,
+            borderColor: '#0072B2',
+            backgroundColor: 'rgba(0, 114, 178, 0.1)',
+            fill: true,
+            pointRadius: 0,
+            tension: 0
+          }
+        ];
+        
+        // Add buffered curve if using buffers
+        if (hasBuffer1 || hasBuffer2) {
+          datasets.push({
+            label: isMobile ? `${agent1Name} Remaining` : `${agent1Name} Remaining vs ${agent2Name} Used`,
+            data: bufferedInterpolatedData,
+            showLine: true,
+            borderColor: '#009E73',
+            backgroundColor: 'rgba(0, 158, 115, 0.1)',
+            fill: true,
+            pointRadius: 0,
+            tension: 0
+          });
+        }
+        
+        // Target point
+        datasets.push({
+          label: 'Target Point',
+          data: [{ 
+            x: hasBuffer2 ? bufferedPlannedDose2 : plannedDose2, 
+            y: hasBuffer1 ? this.calculateBufferedVolume(plannedRemainingMl1, buffer1) : plannedRemainingMl1 
+          }],
+          pointBackgroundColor: '#D55E00',
+          pointBorderColor: '#D55E00',
+          pointRadius: isMobile ? 6 : 8,
+          pointHoverRadius: isMobile ? 8 : 10
+        });
+        
+        // Reference line
+        datasets.push({
+          label: 'Reference Line',
+          data: [
+            { 
+              x: hasBuffer2 ? bufferedPlannedDose2 : plannedDose2, 
+              y: 0 
+            },
+            { 
+              x: hasBuffer2 ? bufferedPlannedDose2 : plannedDose2, 
+              y: hasBuffer1 ? this.calculateBufferedVolume(plannedRemainingMl1, buffer1) : plannedRemainingMl1 
+            }
+          ],
+          borderColor: '#D55E00',
+          borderDash: [5, 5],
+          borderWidth: 2,
+          pointRadius: 0,
+          showLine: true,
+          fill: false
+        });
         
         return {
           type: 'scatter',
           data: {
-            datasets: [
-              {
-                label: isMobile ? `${agent1.name} Remaining` : `${agent1.name} Remaining vs ${agent2.name} Used`,
-                data: interpolatedData,
-                showLine: true,
-                borderColor: '#0072B2',
-                backgroundColor: 'rgba(0, 114, 178, 0.1)',
-                fill: true,
-                pointRadius: 0,
-                tension: 0
-              },
-              {
-                label: 'Target Point',
-                data: [{ x: plannedDose2, y: plannedRemainingMl1 }],
-                pointBackgroundColor: '#D55E00',
-                pointBorderColor: '#D55E00',
-                pointRadius: isMobile ? 6 : 8,
-                pointHoverRadius: isMobile ? 8 : 10
-              },
-              {
-                label: 'Reference Line',
-                data: [
-                  { x: plannedDose2, y: 0 },
-                  { x: plannedDose2, y: plannedRemainingMl1 }
-                ],
-                borderColor: '#D55E00',
-                borderDash: [5, 5],
-                borderWidth: 2,
-                pointRadius: 0,
-                showLine: true,
-                fill: false
-              }
-            ]
+            datasets: datasets
           },
           options: {
             plugins: {
@@ -1086,31 +1294,31 @@
                 callbacks: {
                   title: () => 'Target Dose Point',
                   label: (context) => {
-                    if (context.datasetIndex === 1) {
+                    if (context.datasetIndex === (hasBuffer1 || hasBuffer2 ? 2 : 1)) {
                       return [
-                        `${agent2.name}: ${plannedDose2.toFixed(1)} mL used`,
-                        `${agent1.name}: ${plannedRemainingMl1.toFixed(1)} mL remaining`
+                        `${agent2Name}: ${(hasBuffer2 ? bufferedPlannedDose2 : plannedDose2).toFixed(1)} mL used`,
+                        `${agent1Name}: ${(hasBuffer1 ? this.calculateBufferedVolume(plannedRemainingMl1, buffer1) : plannedRemainingMl1).toFixed(1)} mL remaining`
                       ];
                     }
-                    return `${agent1.name} Remaining: ${context.raw.y.toFixed(1)} mL`;
+                    return `${agent1Name} Remaining: ${context.raw.y.toFixed(1)} mL`;
                   }
                 }
               },
               legend: {
                 labels: {
-                  filter: (item) => item.text !== 'Target Point'
+                  filter: (item) => item.text !== 'Target Point' && item.text !== 'Reference Line'
                 }
               }
             },
             scales: {
               x: this.getScaleOptions(
-                isMobile ? `${agent2.name} Used` : `${agent2.name} Used (mL)`,
-                maxMl2, 
+                isMobile ? `${agent2Name} Used` : `${agent2Name} Used (mL)`,
+                hasBuffer2 ? bufferedMaxMl2 : maxMl2, 
                 isMobile
               ),
               y: this.getScaleOptions(
-                isMobile ? `${agent1.name} Remaining` : `${agent1.name} Remaining (mL)`,
-                maxMl1,
+                isMobile ? `${agent1Name} Remaining` : `${agent1Name} Remaining (mL)`,
+                hasBuffer1 ? bufferedMaxMl1 : maxMl1,
                 isMobile
               )
             }
@@ -1118,28 +1326,49 @@
         };
       }
       
-      generateCombinedPrimaryCard(name, maxMg, maxMl, syringes, remainingInfo = null) {
+      generateCombinedPrimaryCard(name, maxMg, maxMl, syringes, bufferRatio, bufferedMaxMl = null, remainingInfo = null) {
+        const hasBuffer = bufferRatio !== 'none';
+        const displayName = this.getBufferDisplayName(name, bufferRatio);
+        
         let html = `
           <div class="result-card primary-agent">
             <div class="card-content">
               <div class="card-title">
                 <span class="agent-label">FIRST AGENT</span>
-                <span class="agent-name">${name}</span>
+                <span class="agent-name">${name}${hasBuffer ? '<span class="buffer-label">' + bufferRatio + ' NaHCO₃</span>' : ''}</span>
               </div>
               <div class="metric-container">
                 <div class="metric">
                   <span class="metric-icon">💊</span>
                   <span class="metric-value">${this.formatNumber(maxMg)} mg</span>
                   <span class="metric-label">MAX</span>
-                </div>
+                </div>`;
+                
+        // Only show base volume when no buffer is selected
+        if (!hasBuffer) {
+          html += `
                 <div class="metric">
                   <span class="metric-icon">💉</span>
                   <span class="metric-value">${this.formatNumber(maxMl)} mL</span>
-                  <span class="metric-label">VOLUME</span>
-                </div>
+                  <span class="metric-label">BASE VOLUME</span>
+                </div>`;
+        }
+                
+        if (hasBuffer) {
+          html += `
+                <div class="metric">
+                  <span class="metric-icon">🧪</span>
+                  <span class="metric-value">${this.formatNumber(bufferedMaxMl)} mL</span>
+                  <span class="metric-label">WITH BUFFER</span>
+                </div>`;
+        }
+                
+        // Use buffered volume for syringe calculation when buffer is selected
+        const volumeForSyringes = hasBuffer ? bufferedMaxMl : maxMl;
+        html += `
                 <div class="metric">
                   <span class="metric-icon">🔄</span>
-                  <span class="metric-value">${this.formatNumber(maxMl / this.SYRINGE_VOLUME)} x ${this.SYRINGE_VOLUME}mL</span>
+                  <span class="metric-value">${this.formatNumber(volumeForSyringes / this.SYRINGE_VOLUME)} x ${this.SYRINGE_VOLUME}mL</span>
                   <span class="metric-label">SYRINGE(S)</span>
                 </div>
               </div>
@@ -1151,22 +1380,40 @@
             <div class="card-content">
               <div class="card-title">
                 <span class="agent-label" style="background-color: #D55E00;">REMAINING</span>
-                <span class="agent-name">${name}</span>
+                <span class="agent-name">${name}${hasBuffer ? '<span class="buffer-label">' + bufferRatio + ' NaHCO₃</span>' : ''}</span>
               </div>
               <div class="metric-container">
                 <div class="metric">
                   <span class="metric-icon">💊</span>
                   <span class="metric-value">${this.formatNumber(remainingInfo.maxMg)} mg</span>
                   <span class="metric-label">REMAINING</span>
-                </div>
+                </div>`;
+                
+          // Only show base volume when no buffer is selected
+          if (!hasBuffer) {
+            html += `
                 <div class="metric">
                   <span class="metric-icon">💉</span>
                   <span class="metric-value">${this.formatNumber(remainingInfo.maxMl)} mL</span>
-                  <span class="metric-label">VOLUME</span>
-                </div>
+                  <span class="metric-label">BASE VOLUME</span>
+                </div>`;
+          }
+                
+          if (hasBuffer) {
+            html += `
+                <div class="metric">
+                  <span class="metric-icon">🧪</span>
+                  <span class="metric-value">${this.formatNumber(remainingInfo.bufferedMaxMl)} mL</span>
+                  <span class="metric-label">WITH BUFFER</span>
+                </div>`;
+          }
+                
+          // Use buffered volume for remaining syringe calculation when buffer is selected
+          const remainingVolumeForSyringes = hasBuffer ? remainingInfo.bufferedMaxMl : remainingInfo.maxMl;
+          html += `
                 <div class="metric">
                   <span class="metric-icon">🔄</span>
-                  <span class="metric-value">${this.formatNumber(remainingInfo.maxMl / this.SYRINGE_VOLUME)} x ${this.SYRINGE_VOLUME}mL</span>
+                  <span class="metric-value">${this.formatNumber(remainingVolumeForSyringes / this.SYRINGE_VOLUME)} x ${this.SYRINGE_VOLUME}mL</span>
                   <span class="metric-label">SYRINGE(S)</span>
                 </div>
               </div>
@@ -1177,13 +1424,19 @@
         return html;
       }
       
-      generateSecondaryCard(name, maxMg, maxMl, syringes) {
+      generateSecondaryCard(name, maxMg, maxMl, syringes, bufferRatio, bufferedMaxMl = null) {
+        const hasBuffer = bufferRatio !== 'none';
+        const displayName = this.getBufferDisplayName(name, bufferRatio);
+        
+        // Use buffered volume for syringe calculation when buffer is selected
+        const volumeForSyringes = hasBuffer ? bufferedMaxMl : maxMl;
+        
         return `
           <div class="result-card secondary-agent">
             <div class="card-content">
               <div class="card-title">
                 <span class="agent-label">SECOND AGENT</span>
-                <span class="agent-name">${name}</span>
+                <span class="agent-name">${name}${hasBuffer ? '<span class="buffer-label">' + bufferRatio + ' NaHCO₃</span>' : ''}</span>
               </div>
               <div class="metric-container">
                 <div class="metric">
@@ -1191,14 +1444,21 @@
                   <span class="metric-value">${this.formatNumber(maxMg)} mg</span>
                   <span class="metric-label">MAX</span>
                 </div>
+                ${!hasBuffer ? `
                 <div class="metric">
                   <span class="metric-icon">💉</span>
                   <span class="metric-value">${this.formatNumber(maxMl)} mL</span>
-                  <span class="metric-label">VOLUME</span>
-                </div>
+                  <span class="metric-label">BASE VOLUME</span>
+                </div>` : ''}
+                ${hasBuffer ? `
+                <div class="metric">
+                  <span class="metric-icon">🧪</span>
+                  <span class="metric-value">${this.formatNumber(bufferedMaxMl)} mL</span>
+                  <span class="metric-label">WITH BUFFER</span>
+                </div>` : ''}
                 <div class="metric">
                   <span class="metric-icon">🔄</span>
-                  <span class="metric-value">${this.formatNumber(maxMl / this.SYRINGE_VOLUME)} x ${this.SYRINGE_VOLUME}mL</span>
+                  <span class="metric-value">${this.formatNumber(volumeForSyringes / this.SYRINGE_VOLUME)} x ${this.SYRINGE_VOLUME}mL</span>
                   <span class="metric-label">SYRINGE(S)</span>
                 </div>
               </div>
@@ -1223,22 +1483,27 @@
           
           const maxMg1 = this.calculateMaxDose(agent1, weight);
           const maxMl1 = this.calculateMaxVolume(agent1, maxMg1);
+          const buffer1 = this.state.buffer1;
+          const bufferedMaxMl1 = this.calculateBufferedVolume(maxMl1, buffer1);
           
           const isMobile = window.innerWidth <= 768;
           let resultsHTML = '';
           
           const agent2 = this.getAgentByName(this.state.agent2);
           if (!agent2 || agent2.name === "None") {
-            const chartConfig = this.createSingleAgentChartConfig(agent1, maxMl1);
+            const chartConfig = this.createSingleAgentChartConfig(agent1, maxMl1, buffer1, bufferedMaxMl1);
             this.updateChart(chartConfig);
             
             resultsHTML = this.generateCombinedPrimaryCard(
-              agent1.name, maxMg1, maxMl1, maxMl1 / this.SYRINGE_VOLUME
+              agent1.name, maxMg1, maxMl1, maxMl1 / this.SYRINGE_VOLUME, buffer1, bufferedMaxMl1
             );
           } else {
             const plannedDose2 = this.state.plannedDose2;
             const maxMg2 = this.calculateMaxDose(agent2, weight);
             const maxMl2 = this.calculateMaxVolume(agent2, maxMg2);
+            const buffer2 = this.state.buffer2;
+            const bufferedMaxMl2 = this.calculateBufferedVolume(maxMl2, buffer2);
+            const bufferedPlannedDose2 = this.calculateBufferedVolume(plannedDose2, buffer2);
             
             if (maxMl2 <= 0) {
               this.showError(`Cannot calculate combination - maximum dose for ${agent2.name} is zero. Please select a different agent.`);
@@ -1247,6 +1512,7 @@
             
             const plannedRemainingMg1 = maxMg1 * (1 - plannedDose2 / maxMl2);
             const plannedRemainingMl1 = this.calculateMaxVolume(agent1, plannedRemainingMg1);
+            const bufferedRemainingMl1 = this.calculateBufferedVolume(plannedRemainingMl1, buffer1);
             
             if (!isMobile) {
               resultsHTML = '<div class="result-column">';
@@ -1256,11 +1522,13 @@
               const remainingInfo = {
                 maxMg: plannedRemainingMg1,
                 maxMl: plannedRemainingMl1,
-                info: `After ${this.formatNumber(plannedDose2)} mL of ${agent2.name}`
+                bufferedMaxMl: bufferedRemainingMl1,
+                info: `After ${this.formatNumber(plannedDose2)} mL of ${agent2.name}${buffer2 !== 'none' ? ' (' + this.formatNumber(bufferedPlannedDose2) + ' mL with buffer)' : ''}`
               };
               
               resultsHTML += this.generateCombinedPrimaryCard(
-                agent1.name, maxMg1, maxMl1, maxMl1 / this.SYRINGE_VOLUME, remainingInfo
+                agent1.name, maxMg1, maxMl1, maxMl1 / this.SYRINGE_VOLUME, 
+                buffer1, bufferedMaxMl1, remainingInfo
               );
               
               if (!isMobile) {
@@ -1268,19 +1536,24 @@
               }
               
               resultsHTML += this.generateSecondaryCard(
-                agent2.name, maxMg2, maxMl2, maxMl2 / this.SYRINGE_VOLUME
+                agent2.name, maxMg2, maxMl2, maxMl2 / this.SYRINGE_VOLUME,
+                buffer2, bufferedMaxMl2
               );
               
               const chartConfig = this.createCombinationChartConfig(
                 agent1, agent2, maxMl1, maxMl2, 
                 Math.min(plannedDose2, maxMl2), 
-                Math.max(0, plannedRemainingMl1)
+                Math.max(0, plannedRemainingMl1),
+                buffer1, buffer2,
+                bufferedMaxMl1, bufferedMaxMl2,
+                Math.min(bufferedPlannedDose2, bufferedMaxMl2)
               );
               this.updateChart(chartConfig);
               
             } else {
               resultsHTML += this.generateCombinedPrimaryCard(
-                agent1.name, maxMg1, maxMl1, maxMl1 / this.SYRINGE_VOLUME
+                agent1.name, maxMg1, maxMl1, maxMl1 / this.SYRINGE_VOLUME,
+                buffer1, bufferedMaxMl1
               );
               
               if (!isMobile) {
@@ -1288,7 +1561,8 @@
               }
               
               resultsHTML += this.generateSecondaryCard(
-                agent2.name, maxMg2, maxMl2, maxMl2 / this.SYRINGE_VOLUME
+                agent2.name, maxMg2, maxMl2, maxMl2 / this.SYRINGE_VOLUME,
+                buffer2, bufferedMaxMl2
               );
               
               resultsHTML += `
