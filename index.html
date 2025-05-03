@@ -1054,12 +1054,27 @@
       showError(message) {
         this.elements.results.innerHTML = `<div class="error-message" role="alert">${message}</div>`;
       }
+
+      isTumescentLidocaine(agent) {
+        return agent && (
+          agent.name.includes("Lidocaine 0.05%") || 
+          agent.name.includes("Lidocaine 0.1%")
+        );
+      }
       
-      formatNumber(num) {
+      formatNumber(num, isVolume = false) {
+        if (isVolume && num >= 1000) {
+          // Convert to liters for large volumes
+          return (num / 1000).toLocaleString('en-US', { 
+            minimumFractionDigits: 1, 
+            maximumFractionDigits: 1 
+          }) + ' L';
+        }
+        
         return num.toLocaleString('en-US', { 
           minimumFractionDigits: 1, 
           maximumFractionDigits: 1 
-        });
+        }) + (isVolume ? ' mL' : '');
       }
       
       calculateMaxDose(agent, weight) {
@@ -1392,7 +1407,7 @@
       
       generateCombinedPrimaryCard(name, maxMg, maxMl, syringes, bufferRatio, bufferedMaxMl = null, remainingInfo = null) {
         const hasBuffer = bufferRatio !== 'none';
-        const displayName = this.getBufferDisplayName(name, bufferRatio);
+        const isTumescent = this.isTumescentLidocaine({name});
         
         let html = `
           <div class="result-card primary-agent">
@@ -1413,7 +1428,7 @@
           html += `
                 <div class="metric">
                   <span class="metric-icon">💉</span>
-                  <span class="metric-value">${this.formatNumber(maxMl)} mL</span>
+                  <span class="metric-value">${this.formatNumber(maxMl, true)}</span>
                   <span class="metric-label">BASE VOLUME</span>
                 </div>`;
         }
@@ -1422,19 +1437,24 @@
           html += `
                 <div class="metric">
                   <span class="metric-icon">🧪</span>
-                  <span class="metric-value">${this.formatNumber(bufferedMaxMl)} mL</span>
+                  <span class="metric-value">${this.formatNumber(bufferedMaxMl, true)}</span>
                   <span class="metric-label">WITH BUFFER</span>
                 </div>`;
         }
                 
-        // Use buffered volume for syringe calculation when buffer is selected
-        const volumeForSyringes = hasBuffer ? bufferedMaxMl : maxMl;
-        html += `
+        // Only show syringes if not tumescent lidocaine
+        if (!isTumescent) {
+          // Use buffered volume for syringe calculation when buffer is selected
+          const volumeForSyringes = hasBuffer ? bufferedMaxMl : maxMl;
+          html += `
                 <div class="metric">
                   <span class="metric-icon">🔄</span>
                   <span class="metric-value">${this.formatNumber(volumeForSyringes / this.SYRINGE_VOLUME)} x ${this.SYRINGE_VOLUME}mL</span>
                   <span class="metric-label">SYRINGE(S)</span>
-                </div>
+                </div>`;
+        }
+        
+        html += `
               </div>
             </div>`;
             
@@ -1458,8 +1478,8 @@
             html += `
                 <div class="metric">
                   <span class="metric-icon">💉</span>
-                  <span class="metric-value">${this.formatNumber(remainingInfo.maxMl)} mL</span>
-                  <span class="metric-label">BASE VOLUME</span>
+                  <span class="metric-value">${this.formatNumber(remainingInfo.maxMl, true)}</span>
+                  <span class="metric-label">FINAL VOLUME</span>
                 </div>`;
           }
                 
@@ -1467,19 +1487,24 @@
             html += `
                 <div class="metric">
                   <span class="metric-icon">🧪</span>
-                  <span class="metric-value">${this.formatNumber(remainingInfo.bufferedMaxMl)} mL</span>
-                  <span class="metric-label">WITH BUFFER</span>
+                  <span class="metric-value">${this.formatNumber(remainingInfo.bufferedMaxMl, true)}</span>
+                  <span class="metric-label">FINAL VOLUME</span>
                 </div>`;
           }
                 
-          // Use buffered volume for remaining syringe calculation when buffer is selected
-          const remainingVolumeForSyringes = hasBuffer ? remainingInfo.bufferedMaxMl : remainingInfo.maxMl;
-          html += `
+          // Only show remaining syringes if not tumescent lidocaine
+          if (!isTumescent) {
+            // Use buffered volume for remaining syringe calculation when buffer is selected
+            const remainingVolumeForSyringes = hasBuffer ? remainingInfo.bufferedMaxMl : remainingInfo.maxMl;
+            html += `
                 <div class="metric">
                   <span class="metric-icon">🔄</span>
                   <span class="metric-value">${this.formatNumber(remainingVolumeForSyringes / this.SYRINGE_VOLUME)} x ${this.SYRINGE_VOLUME}mL</span>
                   <span class="metric-label">SYRINGE(S)</span>
-                </div>
+                </div>`;
+          }
+          
+          html += `
               </div>
             </div>`;
         }
@@ -1490,12 +1515,12 @@
       
       generateSecondaryCard(name, maxMg, maxMl, syringes, bufferRatio, bufferedMaxMl = null) {
         const hasBuffer = bufferRatio !== 'none';
-        const displayName = this.getBufferDisplayName(name, bufferRatio);
+        const isTumescent = this.isTumescentLidocaine({name});
         
         // Use buffered volume for syringe calculation when buffer is selected
         const volumeForSyringes = hasBuffer ? bufferedMaxMl : maxMl;
         
-        return `
+        let html = `
           <div class="result-card secondary-agent">
             <div class="card-content">
               <div class="card-title">
@@ -1511,24 +1536,32 @@
                 ${!hasBuffer ? `
                 <div class="metric">
                   <span class="metric-icon">💉</span>
-                  <span class="metric-value">${this.formatNumber(maxMl)} mL</span>
+                  <span class="metric-value">${this.formatNumber(maxMl, true)}</span>
                   <span class="metric-label">BASE VOLUME</span>
                 </div>` : ''}
                 ${hasBuffer ? `
                 <div class="metric">
                   <span class="metric-icon">🧪</span>
-                  <span class="metric-value">${this.formatNumber(bufferedMaxMl)} mL</span>
+                  <span class="metric-value">${this.formatNumber(bufferedMaxMl, true)}</span>
                   <span class="metric-label">WITH BUFFER</span>
-                </div>` : ''}
+                </div>` : ''}`;
+                
+        // Only show syringes if not tumescent lidocaine
+        if (!isTumescent) {
+          html += `
                 <div class="metric">
                   <span class="metric-icon">🔄</span>
                   <span class="metric-value">${this.formatNumber(volumeForSyringes / this.SYRINGE_VOLUME)} x ${this.SYRINGE_VOLUME}mL</span>
                   <span class="metric-label">SYRINGE(S)</span>
-                </div>
+                </div>`;
+        }
+        
+        html += `
               </div>
             </div>
-          </div>
-        `;
+          </div>`;
+          
+        return html;
       }
       
       calculateDoses() {
