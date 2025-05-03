@@ -971,12 +971,12 @@
         
         if (!warningElement) return;
         
-        // Check if either agent is lidocaine 0.1%
-        const isLidocaine01 = (value) => {
-          return value.includes('Lidocaine 0.1%');
+        // Check if either agent is lidocaine 0.05% or 0.1%
+        const isDiluteLidocaine = (value) => {
+          return value.includes('Lidocaine 0.1%') || value.includes('Lidocaine 0.05%');
         };
         
-        if (isLidocaine01(agent1Value) || isLidocaine01(agent2Value)) {
+        if (isDiluteLidocaine(agent1Value) || isDiluteLidocaine(agent2Value)) {
           warningElement.style.display = 'flex';
         } else {
           warningElement.style.display = 'none';
