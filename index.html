@@ -688,8 +688,8 @@
 
     <div id="lidocaineWarning" class="important-admonition" style="display: none;">
       <div class="important-content">
-        <div class="important-title">Note on Lidocaine 0.1%</div>
-        <p style="text-align: justify;">For lidocaine 0.1% formulations (with or without liposuction), the calculator uses <strong>only</strong> the weight-based dosing (mg/kg) without applying a maximum total dosage limit. This is because there is no established evidence for maximum total dosage for these dilute formulations. Clinical judgment should be exercised when using large volumes of tumescent lidocaine.</p>
+        <div class="important-title">Note on tumescent lidocaine</div>
+        <p style="text-align: justify;">For lidocaine 0.05-0.1% formulations (with or without liposuction), the calculator uses <strong>only</strong> the weight-based dosing (mg/kg) without applying a maximum total dosage limit. This is because there is no established evidence for maximum total dosage for these dilute formulations. Clinical judgment should be exercised when using large volumes of tumescent lidocaine.</p>
       </div>
     </div>
     
@@ -787,6 +787,8 @@
   <script>
     // Define anesthetic agents data outside the class
     const ANESTHETIC_AGENTS = [
+      { name: "Lidocaine 0.05% (no liposuction)", maxMgKg: 28, maxTotalMg: null, concentration: 0.05 },
+      { name: "Lidocaine 0.05% (with liposuction)", maxMgKg: 55, maxTotalMg: null, concentration: 0.05 },
       { name: "Lidocaine 0.1% (no liposuction)", maxMgKg: 28, maxTotalMg: null, concentration: 0.1 },
       { name: "Lidocaine 0.1% (with liposuction)", maxMgKg: 55, maxTotalMg: null, concentration: 0.1 },
       { name: "Lidocaine 0.5%", maxMgKg: 5, maxTotalMg: 300, concentration: 0.5 },
