@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Local Anesthesia Dose Calculator</title>
+  <link rel="icon" href="favicon.png" type="image/png">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <style>
+    :root {
+      --color-primary: #0072B2;     /* Blue */
+      --color-primary-light: #E1ECF3;
+      --color-secondary: #555555;   /* Dark Gray */
+      --color-warning: #CC79A7;     /* Pink */
+      --color-danger: #D55E00;      /* Vermillion */
+      --color-background: #ffffff;  /* White */
+      --color-text: #000000;        /* Black */
+      --color-border: #dddddd;      /* Light Gray */
+      
+      --spacing-xs: 0.25rem;
+      --spacing-sm: 0.5rem;
+      --spacing-md: 1rem;
+      --spacing-lg: 1.5rem;
+      --spacing-xl: 2rem;
+      
+      --border-radius: 0.5rem;
+      
+      --font-size-sm: 0.75rem;
+      --font-size-base: 1rem;
+      --font-size-lg: 1.125rem;
+      --font-size-xl: 1.25rem;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      margin: var(--spacing-md);
+      background-color: var(--color-background);
+      color: var(--color-text);
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: var(--spacing-md);
+    }
+
+    h1 {
+      margin-bottom: var(--spacing-lg);
+      color: var(--color-primary);
+    }
+
+    h2 {
+      margin-top: var(--spacing-lg);
+      margin-bottom: var(--spacing-md);
+      font-size: var(--font-size-lg);
+    }
+
+    h3 {
+      margin-top: var(--spacing-md);
+      font-size: var(--font-size-base);
+    }
+
+    .weight-input-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: var(--spacing-md);
+      flex-wrap: nowrap;
+    }
+    
+    .unit-toggle {
+      display: flex;
+      margin-left: 10px;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid var(--color-primary);
+    }
+    
+    .unit-button {
+      padding: 8px 16px;
+      background: none;
+      border: none;
+      font-size: var(--font-size-base);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .unit-button.active {
+      background-color: var(--color-primary);
+      color: white;
+    }
+    
+    .unit-button:not(.active) {
+      background-color: white;
+      color: var(--color-primary);
+    }
+    
+    .unit-button:first-child {
+      border-radius: 20px 0 0 20px;
+    }
+    
+    .unit-button:last-child {
+      border-radius: 0 20px 20px 0;
+    }
+
+    label {
+      display: block;
+      margin-bottom: var(--spacing-xs);
+      font-weight: 500;
+    }
+
+    .form-group {
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .input-group {
+      display: flex;
+      gap: 0;
+      max-width: 440px;
+    }
+    
+    .input-group select:first-child {
+      flex: 2;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      min-width: 250px;
+    }
+    
+    .input-group select:last-child {
+      flex: 1;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      border-left: none;
+      min-width: 120px;
+    }
+
+    select, input {
+      display: block;
+      width: 100%;
+      max-width: 300px;
+      padding: 10px 12px;
+      border: 1px solid var(--color-border);
+      border-radius: 20px;
+      font-size: var(--font-size-base);
+      transition: all 0.3s ease;
+      background-color: var(--color-background);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+    }
+    
+    select {
+      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%230072B2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+      padding-right: 36px;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(0, 114, 178, 0.15);
+      transform: translateY(-1px);
+    }
+
+    input:invalid, .invalid-input {
+      border-color: var(--color-warning);
+      background-color: rgba(204, 121, 167, 0.05);
+      box-shadow: 0 0 0 1px var(--color-warning);
+    }
+
+    #results {
+        padding: 0;
+        margin: var(--spacing-md) 0;
+    }
+    
+    .result-card {
+        background-color: white;
+        border-radius: 12px;
+        padding: 0;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .card-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        padding: 16px;
+    }
+
+    .card-title {
+        display: flex;
+        align-items: flex-start;
+        flex: 0 0 auto;
+        margin-right: 16px;
+        margin-bottom: 8px;
+        padding-left: 0;
+    }
+    
+    .agent-label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px 10px;
+      min-height: 24px;
+      background-color: var(--color-primary);
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+      border-radius: 20px;
+      margin-right: 10px;
+      letter-spacing: 0.5px;
+      text-align: center;
+      line-height: 1.2;
+    }
+    
+    .secondary-agent .agent-label {
+      background-color: #009E73;
+    }
+    
+    .remaining-agent .agent-label {
+      background-color: #D55E00;
+      color: white;
+    }
+    
+    .buffer-label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3px 8px;
+      min-height: 20px;
+      background-color: #f0f0f0;
+      color: #555555;
+      font-size: 11px;
+      font-weight: bold;
+      border-radius: 20px;
+      margin-left: 8px;
+      letter-spacing: 0.5px;
+      text-align: center;
+      line-height: 1.2;
+    }
+    
+    .agent-name {
+      font-weight: bold;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .info-text {
+        font-size: 14px;
+        color: var(--color-secondary);
+        opacity: 0.75;
+        margin-top: 0;
+        padding: 10px 16px;
+        border-top: 1px solid #eee;
+        width: 100%;
+        clear: both;
+    }
+            
+    .metric-container {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .metric {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 8px 12px;
+        background-color: rgba(0,0,0,0.03);
+        border-radius: 8px;
+        margin-right: 8px;
+        margin-bottom: 20px;
+        position: relative;
+        min-width: 120px;
+    }
+
+    .metric-icon {
+        margin-right: 10px;
+        font-size: 18px;
+    }
+
+    .metric-value {
+        font-weight: 500;
+    }
+
+    .metric-label {
+        font-size: 14px;
+        color: var(--color-secondary);
+        opacity: 0.7;
+        text-transform: uppercase;
+        position: absolute;
+        bottom: -18px;
+        left: 0;
+        font-weight: bold;
+        opacity: 0.5;
+    }
+
+    .error-message {
+      color: var(--color-danger);
+      font-weight: bold;
+      padding: var(--spacing-md);
+      border-radius: var(--border-radius);
+      border: 1px solid var(--color-danger);
+      background-color: rgba(213, 94, 0, 0.1);
+    }
+
+    .important-admonition, .warning-admonition {
+      display: flex;
+      margin: var(--spacing-lg) 0;
+      padding: var(--spacing-md);
+      border-radius: var(--border-radius);
+      color: var(--color-text);
+    }
+    
+    .important-admonition {
+      border: 1px solid var(--color-warning);
+      background: linear-gradient(to bottom right, rgba(204, 121, 167, 0.1), rgba(204, 121, 167, 0));
+    }
+    
+    .warning-admonition {
+      border: 1px solid var(--color-danger);
+      background: linear-gradient(to bottom right, rgba(213, 94, 0, 0.1), rgba(213, 94, 0, 0));
+    }
+    
+    .important-content, .warning-content {
+      flex: 1;
+    }
+    
+    .important-title, .warning-title {
+      font-weight: 600;
+      margin-bottom: var(--spacing-xs);
+    }
+    
+    .important-title {
+      color: var(--color-warning);
+    }
+    
+    .warning-content p:first-of-type {
+      text-indent: 2em;
+    }
+    
+    .warning-content p {
+      margin-bottom: var(--spacing-xs);
+      text-align: justify;
+    }
+    
+    .warning-title {
+      color: var(--color-danger);
+    }
+
+    .disclaimer-section {
+        font-size: var(--font-size-base);
+        color: var(--color-secondary);
+        opacity: 0.8;
+        margin: var(--spacing-md) 0;
+        padding: var(--spacing-md);
+    }
+    
+    .disclaimer-citation, .disclaimer-note {
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .disclaimer-section h4 {
+        font-size: 1rem;
+        font-weight: normal;
+        margin-bottom: var(--spacing-xs);
+        color: var(--color-secondary);
+    }
+    
+    .academic-quote {
+        font-style: italic;
+        border-left: 3px solid rgba(85, 85, 85, 0.3);
+        padding-left: var(--spacing-md);
+        margin: var(--spacing-xs) 0;
+        text-align: justify;
+    }
+    
+    .disclaimer-note p {
+        margin: 0;
+        line-height: 1.6;
+        text-align: justify;
+    }
+
+    .instructions {
+      font-size: var(--font-size-base);
+      color: var(--color-secondary);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .instructions ol {
+      margin-top: 0.5rem;
+      margin-left: 1.5rem;
+    }
+
+    .instructions li {
+      margin-bottom: 0.25rem;
+    }
+
+    h3 {
+        text-align: left;
+        margin-bottom: var(--spacing-md);
+    }
+
+    h3 + p, p + p {
+        text-align: justify;
+        text-indent: 2em;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid #e0e0e0;
+      border-radius: var(--border-radius);
+      margin: var(--spacing-lg) 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 600px;
+      font-size: var(--font-size-base);
+      background-color: white;
+    }
+
+    thead {
+      background-color: #f8f9fa;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      text-align: center;
+      border: 1px solid #e0e0e0;
+    }
+
+    th {
+      font-weight: 600;
+      color: #333;
+      border-bottom: 2px solid #ddd;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+
+    .group-header {
+      background-color: #eef2f7;
+      font-weight: bold;
+      text-align: left;
+      color: #333;
+      padding-left: 15px;
+    }
+
+    tbody tr:hover {
+      background-color: rgba(0, 114, 178, 0.05);
+    }
+
+    .references {
+        font-size: var(--font-size-sm);
+        color: var(--color-secondary);
+        margin-top: var(--spacing-xl);
+        padding-top: var(--spacing-md);
+        border-top: 1px solid var(--color-border);
+    }
+
+    .mb-1 {
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .mb-2 {
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .loading {
+      display: inline-block;
+      width: 2rem;
+      height: 2rem;
+      border: 4px solid rgba(0, 114, 178, 0.2);
+      border-radius: 50%;
+      border-top-color: var(--color-primary);
+      animation: spin 1s ease-in-out infinite;
+      margin: var(--spacing-md) auto;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+          @media (max-width: 768px) {
+      .container {
+        padding: var(--spacing-sm);
+      }
+      
+      table {
+        font-size: 0.7rem;
+      }
+      
+      th, td {
+        padding: var(--spacing-xs);
+      }
+      
+      .result-metrics {
+        flex-direction: column;
+      }
+      
+      .metric {
+        width: 100%;
+        margin-right: 0;
+      }
+      
+      .unit-button {
+        padding: 8px 10px;
+        font-size: var(--font-size-sm);
+      }
+      
+      #weight {
+        max-width: 120px;
+      }
+      
+      .card-content {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .card-title {
+        margin-bottom: 12px;
+        width: 100%;
+      }
+      
+      .metric-container {
+        width: 100%;
+      }
+      
+      .card-title {
+        flex-wrap: wrap;
+      }
+      
+      .agent-label {
+        margin-bottom: 4px;
+      }
+      
+      
+      .input-group select:first-child,
+      .input-group select:last-child {
+        width: auto; /* Use auto instead of 100% */
+        max-width: none;
+        border-radius: 0;
+      }
+      
+      /* Restore original styling for first select */
+      .input-group select:first-child {
+        flex: 2;
+        border-top-left-radius: 20px;
+        border-bottom-left-radius: 20px;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        min-width: 0; /* Allow flexbox to handle sizing */
+      }
+      
+      /* Restore original styling for second select */
+      .input-group select:last-child {
+        flex: 1;
+        border-top-right-radius: 20px;
+        border-bottom-right-radius: 20px;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-left: none;
+        min-width: 0; /* Allow flexbox to handle sizing */
+      }
+    }
+
+    @media (min-width: 769px) {
+      #results {
+        display: flex;
+        gap: var(--spacing-md);
+      }
+      
+      .result-column {
+        flex: 1;
+      }
+    }
+
+    *:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+    
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--color-primary);
+      color: white;
+      padding: 8px;
+      z-index: 100;
+      transition: top 0.3s;
+    }
+    
+    .skip-link:focus {
+      top: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <div class="container" id="main-content">
+    <h1>Local Anesthesia Dose Calculator</h1>
+    <div class="instructions">
+      <strong>Instructions:</strong> Calculate maximum dose of local anesthesics or two anesthetics in combination.
+      <ol>
+        <li>Input the patient's weight.</li>
+        <li>Select the anesthetic agent(s) (select "None" for second agent if using only one).</li>
+        <li>Optionally select a buffer ratio for each agent (NaHCO₃ buffering).</li>
+        <li>If using a second agent, input the estimated dose.</li>
+      </ol>
+    </div>
+    
+    <form id="calculator-form" aria-label="Dose calculator form">
+      <div class="form-group">
+        <label for="weight">Patient Weight</label>
+        <div class="weight-input-container">
+          <input type="number" id="weight" value="70" min="0" step="any" aria-label="Patient weight" required>
+          <div class="unit-toggle" role="radiogroup" aria-label="Weight unit">
+            <button type="button" id="kgButton" class="unit-button active" data-unit="kg" aria-pressed="true">kg</button>
+            <button type="button" id="lbsButton" class="unit-button" data-unit="lbs" aria-pressed="false">lbs</button>
+          </div>
+        </div>
+        <input type="hidden" id="weightUnit" value="kg">
+      </div>
+
+
+<!-- First Agent Form Group -->
+<div class="form-group">
+  <div style="display: flex; max-width: 440px;">
+    <label for="agent1" style="flex: 2; min-width: 250px;">First Agent</label>
+    <label for="buffer1" style="flex: 1; min-width: 120px; margin-left: -50px;">Buffer</label>
+  </div>
+  <div class="input-group">
+    <select id="agent1" aria-label="First anesthetic agent" required></select>
+    <select id="buffer1" aria-label="Buffer ratio for first agent">
+      <option value="none">None</option>
+      <option value="3:1">3:1 NaHCO₃</option>
+      <option value="9:1">9:1 NaHCO₃</option>
+      <option value="10:1">10:1 NaHCO₃</option>
+    </select>
+  </div>
+</div>
+
+<!-- Second Agent Form Group -->
+<div class="form-group">
+  <div style="display: flex; max-width: 440px;">
+    <label for="agent2" style="flex: 2; min-width: 250px;">Second Agent</label>
+    <label for="buffer2" style="flex: 1; min-width: 120px; margin-left: -50px;">Buffer</label>
+  </div>
+  <div class="input-group">
+    <select id="agent2" aria-label="Second anesthetic agent"></select>
+    <select id="buffer2" aria-label="Buffer ratio for second agent">
+      <option value="none">None</option>
+      <option value="3:1">3:1 NaHCO₃</option>
+      <option value="9:1">9:1 NaHCO₃</option>
+      <option value="10:1">10:1 NaHCO₃</option>
+    </select>
+  </div>
+</div>
+
+      <div class="form-group" id="agent2DoseGroup">
+        <label for="plannedDose2">Planned Dose of Second Agent (mL)</label>
+        <input type="number" id="plannedDose2" value="6" min="0" step="any" aria-label="Planned dose for second agent in milliliters">
+      </div>
+    </form>
+
+    <div id="lidocaineWarning" class="important-admonition" style="display: none;">
+      <div class="important-content">
+        <div class="important-title">Note on tumescent lidocaine</div>
+        <p style="text-align: justify;">For tumescent lidocaine 0.05-0.1% formulations (with or without liposuction), the calculator uses <strong>only</strong> the weight-based dosing (mg/kg) without applying a maximum total dosage limit — there is no established evidence for maximum total dosage for these dilute formulations. This recommendation is valid only for the weight range studied (43.6-81.8 kg), and the safety of this dose on patients outside this weight range has not been confirmed. Clinical judgment should be exercised when using large volumes of tumescent lidocaine.</p>
+      </div>
+    </div>
+    
+
+    <h2>Results</h2>
+    <div id="results" aria-live="polite">
+      <div class="loading" role="status" aria-label="Calculating dosages"></div>
+    </div>
+    <div class="important-admonition">
+      <div class="important-content">
+        <div class="important-title">Important</div>
+        <p style="text-align: justify;">This calculator provides guidance based on published recommendations.<sup>1, 2</sup> Always double check and err on the side of caution. Clinical judgment by a physician is required in every situation. The user assumes all responsibility for decisions made with the information provided by this app. The maximum recommended doses displayed are for otherwise healthy adults. For patients with the following conditions, dose reductions may be necessary:<sup>3</sup></p>
+        <ul style="margin-left: 20px; margin-bottom: 10px; margin-top: 10px;">
+          <li>Age Extremes (< 4 months or > 70 years)</li>
+          
+          <li>Severe Renal Dysfunction</li>
+          
+          <li>Hepatic Dysfunction</li>
+          
+          <li>Advanced Heart Failure</li>
+          
+          <li>Pregnancy</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>Adjusted maximum doses of local anesthetic combination</h2>
+    <div>
+      <canvas id="doseChart"></canvas>
+    </div>
+
+    <h2>Local anesthetic properties and max doses<sup>1</sup></h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col" rowspan="2">Anesthetic</th>
+            <th scope="col" rowspan="2">Onset (min)</th>
+            <th scope="col" colspan="2">Duration (min)</th>
+            <th scope="col" colspan="2">Maximum recommended dose for adults</th>
+          </tr>
+          <tr>
+            <th scope="col">Without epi</th>
+            <th scope="col">With epi</th>
+            <th scope="col">Without epi</th>
+            <th scope="col">With epi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="group-header" colspan="6">Amides</td></tr>
+          <tr><td>Articaine</td><td>2-4</td><td>30-120</td><td>60-240</td><td>5.0 mg/kg or 350 mg</td><td>7.0 mg/kg or 500 mg</td></tr>
+          <tr><td>Bupivacaine</td><td>2-10</td><td>120-240</td><td>240-480</td><td>2.5 mg/kg or 175 mg</td><td>3.0 mg/kg or 225 mg</td></tr>
+          <tr><td>Etidocaine</td><td>3-5</td><td>200</td><td>240-360</td><td>4.5 mg/kg or 300 mg</td><td>6.5 mg/kg or 450 mg</td></tr>
+          <tr><td>Lidocaine</td><td>&lt;1</td><td>30-120</td><td>60-240</td><td>4.5 mg/kg or 300 mg</td><td>7.0 mg/kg or 500 mg</td></tr>
+          <tr><td>Mepivacaine</td><td>3-20</td><td>30-120</td><td>60-240</td><td>6.0 mg/kg or 400 mg</td><td>7.0 mg/kg or 550 mg</td></tr>
+          <tr><td>Prilocaine</td><td>5-6</td><td>30-120</td><td>60-240</td><td>7.0 mg/kg or 400 mg</td><td>10.0 mg/kg or 600 mg</td></tr>
+          <tr><td class="group-header" colspan="6">Esters</td></tr>
+          <tr><td>Chloroprocaine</td><td>5-6</td><td>30-60</td><td>N/A</td><td>11.0 mg/kg or 800 mg</td><td>14.0 mg/kg or 1000 mg</td></tr>
+          <tr><td>Procaine</td><td>5</td><td>15-90</td><td>30-180</td><td>10.0 mg/kg</td><td>14.0 mg/kg</td></tr>
+          <tr><td>Tetracaine</td><td>7</td><td>120-240</td><td>240-480</td><td>2.0 mg/kg</td><td>2.0 mg/kg</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="disclaimer-section">
+        <div class="disclaimer-citation">
+          <h4>Disclaimer from the article that shared the above table:<sup>1</sup></h4>
+          <blockquote class="academic-quote">
+            "Adherence to these guidelines will not ensure successful treatment in every situation. Furthermore, these guidelines should not be interpreted as setting a standard of care, or be deemed inclusive of all proper methods of care reasonably directed to obtaining the same results. The ultimate judgment regarding the propriety of any specific therapy and/or technique must be made by the physician and the patient in light of all the circumstances presented by the individual patient, and the known variability and biological behavior of the disease. This guideline reflects the best available data at the time the guideline was prepared. The results of future studies may require revisions to the recommendations in this guideline to reflect new data."
+          </blockquote>
+        </div>
+        <div class="disclaimer-note">
+          <p>The values used for calculations are for adults only and are higher than recommended for pediatric patients. For example, the recommended maximum dose of lidocaine in pediatric patients is 1.2–2 mg/kg without epinephrine and 3–4.5 mg/kg with epinephrine.</p>
+        </div>
+    </div>
+
+    <div class="warning-admonition">
+      <div class="warning-content">
+        <div class="warning-title">Local Anesthetic Systemic Toxicity (LAST)</div>
+        <p>LAST is a rare but potentially life-threatening event resulting from systemic absorption of local anesthetic agents. Clinicians must be vigilant for early signs and symptoms, which can progress rapidly. Initial manifestations often involve the central nervous system, including circumoral numbness, metallic taste, lightheadedness, visual and auditory disturbances, and anxiety. This can be followed by more severe CNS toxicity such as drowsiness, slurred speech, muscle twitching, and ultimately, seizures. Cardiovascular involvement may present with hypertension and tachycardia initially, followed by hypotension, bradycardia, various arrhythmias, and potentially cardiac arrest.</p>
+        <p>This calculator provides guidance on maximum recommended dosages based on established guidelines and patient factors. However, it is the sole responsibility of the administering physician to carefully consider individual patient characteristics, employ meticulous injection techniques, and continuously monitor for any signs or symptoms of LAST throughout the procedure and immediate post-procedural period. Prompt recognition and appropriate management, including immediate cessation of local anesthetic administration and adherence to established treatment protocols, are critical in mitigating the risks associated with LAST.</p>
+      </div>
+    </div>
+
+    <div class="references">
+      <h3>References:</h3>
+      <ol>
+        <li><a href="https://www.jaad.org/article/S0190-9622%2816%2900074-8/fulltext" target="_blank" rel="noopener noreferrer">Kouba DJ, LoPiccolo MC, Alam M, et al. Guidelines for the use of local anesthesia in office-based dermatologic surgery. J Am Acad Dermatol. 2016;74(6):1201-1219.</a></li>
+        <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6635186/" target="_blank" rel="noopener noreferrer">Budney SM, Holcombe TC. A Visual Method for the Safe Administration of Multiple Local Anesthetics. Plast Reconstr Surg Glob Open. 2019;7(6):e2294.</a></li>
+        <li><a href="https://pubmed.ncbi.nlm.nih.gov/15635516/" target="_blank" rel="noopener noreferrer">Rosenberg PH, Veering BT, Urmey WF. Maximum recommended doses of local anesthetics: a multifactorial concept. Reg Anesth Pain Med. 2004;29(6):564-524. doi:10.1016/j.rapm.2004.08.003</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <script>
+    // Define anesthetic agents data outside the class
+    const ANESTHETIC_AGENTS = [
+      { name: "Tumescent Lidocaine 0.05% (no liposuction)", maxMgKg: 28, maxTotalMg: null, concentration: 0.05 },
+      { name: "Tumescent Lidocaine 0.05% (with liposuction)", maxMgKg: 55, maxTotalMg: null, concentration: 0.05 },
+      { name: "Tumescent Lidocaine 0.1% (no liposuction)", maxMgKg: 28, maxTotalMg: null, concentration: 0.1 },
+      { name: "Tumescent Lidocaine 0.1% (with liposuction)", maxMgKg: 55, maxTotalMg: null, concentration: 0.1 },
+      { name: "Lidocaine 0.5%", maxMgKg: 4.5, maxTotalMg: 300, concentration: 0.5 },
+      { name: "Lidocaine 1%", maxMgKg: 4.5, maxTotalMg: 300, concentration: 1 },
+      { name: "Lidocaine 2%", maxMgKg: 4.5, maxTotalMg: 300, concentration: 2 },
+      { name: "Lidocaine 0.5% with epi", maxMgKg: 7, maxTotalMg: 500, concentration: 0.5 },
+      { name: "Lidocaine 1% with epi", maxMgKg: 7, maxTotalMg: 500, concentration: 1 },
+      { name: "Lidocaine 2% with epi", maxMgKg: 7, maxTotalMg: 500, concentration: 2 },
+      { name: "Pediatric Lidocaine 0.5%", maxMgKg: 2, maxTotalMg: 300, concentration: 0.5 },
+      { name: "Pediatric Lidocaine 0.5% with epi", maxMgKg: 4.5, maxTotalMg: 500, concentration: 0.5 },
+      { name: "Pediatric Lidocaine 1%", maxMgKg: 2, maxTotalMg: 300, concentration: 1 },
+      { name: "Pediatric Lidocaine 1% with epi", maxMgKg: 4.5, maxTotalMg: 500, concentration: 1 },
+      { name: "Bupivacaine 0.25%", maxMgKg: 2.5, maxTotalMg: 175, concentration: 0.25 },
+      { name: "Bupivacaine 0.5%", maxMgKg: 2.5, maxTotalMg: 175, concentration: 0.5 },
+      { name: "Bupivacaine 0.25% with epi", maxMgKg: 3, maxTotalMg: 225, concentration: 0.25 },
+      { name: "Bupivacaine 0.5% with epi", maxMgKg: 3, maxTotalMg: 225, concentration: 0.5 },
+      { name: "Articaine 4%", maxMgKg: 5, maxTotalMg: 350, concentration: 4 },
+      { name: "Articaine 4% with epi", maxMgKg: 7, maxTotalMg: 500, concentration: 4 },
+      { name: "Mepivacaine 1%", maxMgKg: 6, maxTotalMg: 400, concentration: 1 },
+      { name: "Mepivacaine 2%", maxMgKg: 6, maxTotalMg: 400, concentration: 2 },
+      { name: "Mepivacaine 1% with epi", maxMgKg: 7, maxTotalMg: 550, concentration: 1 },
+      { name: "Mepivacaine 2% with epi", maxMgKg: 7, maxTotalMg: 550, concentration: 2 },
+      { name: "Prilocaine 0.5%", maxMgKg: 7, maxTotalMg: 400, concentration: 0.5 },
+      { name: "Prilocaine 1%", maxMgKg: 7, maxTotalMg: 400, concentration: 1 },
+      { name: "Prilocaine 0.5% with epi", maxMgKg: 10, maxTotalMg: 600, concentration: 0.5 },
+      { name: "Prilocaine 1% with epi", maxMgKg: 10, maxTotalMg: 600, concentration: 1 },
+      { name: "None", maxMgKg: 0, maxTotalMg: 0, concentration: 0 }
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        new AnesthesiaCalculator();
+      } catch (error) {
+        console.error('Failed to initialize calculator:', error);
+        document.getElementById('results').innerHTML = `
+          <div class="error-message" role="alert">
+            <p>Failed to initialize the calculator.</p>
+            <p>Please refresh the page or try again later.</p>
+            <p>Error details: ${error.message}</p>
+          </div>
+        `;
+      }
+    });
+
+    class AnesthesiaCalculator {
+      constructor() {
+        this.SYRINGE_VOLUME = 3;
+        this.DEBOUNCE_DELAY = 300;
+        this.agents = ANESTHETIC_AGENTS;
+        this.elements = this.cacheElements();
+        this.state = {
+          weight: 70,
+          weightUnit: 'kg',
+          agent1: 'Lidocaine 0.5% with epi',
+          buffer1: 'none',
+          agent2: 'Bupivacaine 0.5% with epi',
+          buffer2: 'none',
+          plannedDose2: 6,
+          chartInstance: null,
+          debounceTimer: null,
+          isCalculating: false
+        };
+        this.init();
+      }
+      
+      cacheElements() {
+        const elements = {};
+        [
+          'weight', 'weightUnit', 'agent1', 'buffer1', 'agent2', 'buffer2', 'plannedDose2', 
+          'agent2DoseGroup', 'results', 'doseChart', 'calculator-form',
+          'kgButton', 'lbsButton'
+        ].forEach(id => {
+          elements[id] = document.getElementById(id);
+          if (!elements[id]) console.error(`Element with ID '${id}' not found.`);
+        });
+        
+        if (elements.doseChart) {
+          elements.chartCtx = elements.doseChart.getContext('2d');
+        }
+        
+        return elements;
+      }
+      
+      init() {
+        if (typeof Chart === 'undefined') {
+          const scriptEl = document.createElement('script');
+          scriptEl.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+          scriptEl.onload = () => this.init();
+          scriptEl.onerror = () => {
+            this.showError('Failed to load Chart.js. The calculator will provide numerical results without visualization.');
+            this.calculateDoses();
+          };
+          document.head.appendChild(scriptEl);
+          return;
+        }
+        
+        this.populateAgentSelectors();
+        this.setupEventListeners();
+        this.updateState();
+        this.calculateDoses();
+        this.checkAndShowLidocaineWarning();
+      }
+      
+      populateAgentSelectors() {
+        const { agent1, agent2 } = this.elements;
+        
+        agent1.innerHTML = '';
+        agent2.innerHTML = '';
+        
+        this.agents.forEach(agent => {
+          if (agent.name !== "None") {
+            agent1.appendChild(new Option(agent.name, agent.name));
+          }
+          agent2.appendChild(new Option(agent.name, agent.name));
+        });
+        
+        agent1.value = this.state.agent1;
+        agent2.value = this.state.agent2;
+        
+        this.updateAgent2DoseVisibility();
+      }
+      
+      setupEventListeners() {
+        [
+          this.elements.weight, 
+          this.elements.agent1, 
+          this.elements.buffer1,
+          this.elements.buffer2,
+          this.elements.plannedDose2
+        ].forEach(el => 
+          el.addEventListener('input', () => this.debouncedCalculate())
+        );
+        
+        [this.elements.weight, this.elements.plannedDose2].forEach(el => 
+          el.addEventListener('invalid', e => e.preventDefault())
+        );
+        
+        this.elements.agent2.addEventListener('change', () => {
+          this.updateAgent2DoseVisibility();
+          this.debouncedCalculate();
+        });
+        
+        [this.elements.kgButton, this.elements.lbsButton].forEach(button => 
+          button.addEventListener('click', () => this.setWeightUnit(button.dataset.unit))
+        );
+        
+        this.elements['calculator-form'].addEventListener('submit', e => {
+          e.preventDefault();
+          if (this.updateState()) this.calculateDoses();
+        });
+
+        this.elements.agent1.addEventListener('change', () => {
+          this.checkAndShowLidocaineWarning();
+        });
+        
+        this.elements.agent2.addEventListener('change', () => {
+          this.checkAndShowLidocaineWarning();
+        });
+
+        window.addEventListener('resize', () => {
+          // Store previous dimensions to detect meaningful changes
+          if (!this.prevWidth) {
+            this.prevWidth = window.innerWidth;
+            return;
+          }
+          
+          // Only redraw chart if width changed by at least 5px
+          const widthDiff = Math.abs(window.innerWidth - this.prevWidth);
+          if (widthDiff > 5 && this.state.chartInstance) {
+            this.prevWidth = window.innerWidth;
+            this.debouncedCalculate();
+          }
+        });
+      }
+
+      checkAndShowLidocaineWarning() {
+        const agent1Value = this.elements.agent1.value;
+        const agent2Value = this.elements.agent2.value;
+        const warningElement = document.getElementById('lidocaineWarning');
+        
+        if (!warningElement) return;
+        
+        // Check if either agent is lidocaine 0.05% or 0.1%
+        const isDiluteLidocaine = (value) => {
+          return value.includes('Lidocaine 0.1%') || value.includes('Lidocaine 0.05%');
+        };
+        
+        if (isDiluteLidocaine(agent1Value) || isDiluteLidocaine(agent2Value)) {
+          warningElement.style.display = 'flex';
+        } else {
+          warningElement.style.display = 'none';
+        }
+      }
+      
+      updateAgent2DoseVisibility() {
+        this.elements.agent2DoseGroup.style.display = 
+          this.elements.agent2.value === 'None' ? 'none' : 'block';
+      }
+      
+      updateState() {
+        const { weight, plannedDose2, agent1, buffer1, agent2, buffer2, weightUnit } = this.elements;
+        const weightValue = parseFloat(weight.value);
+        const dose2Value = parseFloat(plannedDose2.value);
+        
+        const isWeightValid = weightValue > 0 && !isNaN(weightValue);
+        weight.classList.toggle('invalid-input', !isWeightValid);
+        if (isWeightValid) this.state.weight = weightValue;
+        
+        const isDoseValid = dose2Value >= 0 && !isNaN(dose2Value);
+        plannedDose2.classList.toggle('invalid-input', !isDoseValid);
+        if (isDoseValid) this.state.plannedDose2 = dose2Value;
+        
+        this.state.agent1 = agent1.value;
+        this.state.buffer1 = buffer1.value;
+        this.state.agent2 = agent2.value;
+        this.state.buffer2 = buffer2.value;
+        this.state.weightUnit = weightUnit.value;
+        
+        return isWeightValid && isDoseValid;
+      }
+      
+      setWeightUnit(unit) {
+        const { kgButton, lbsButton, weightUnit } = this.elements;
+        
+        [kgButton, lbsButton].forEach(button => {
+          const isActive = button.dataset.unit === unit;
+          button.setAttribute('aria-pressed', isActive);
+          button.classList.toggle('active', isActive);
+        });
+        
+        weightUnit.value = unit;
+        this.state.weightUnit = unit;
+        
+        this.debouncedCalculate();
+      }
+      
+      debouncedCalculate() {
+        if (this.state.debounceTimer) {
+          clearTimeout(this.state.debounceTimer);
+        }
+        
+        if (!this.state.isCalculating) {
+          this.state.isCalculating = true;
+          this.elements.results.innerHTML = '<div class="loading" role="status" aria-label="Calculating dosages"></div>';
+        }
+        
+        this.state.debounceTimer = setTimeout(() => {
+          if (this.updateState()) {
+            this.calculateDoses();
+          }
+          this.state.isCalculating = false;
+        }, this.DEBOUNCE_DELAY);
+      }
+      
+      getWeightKg() {
+        return this.state.weightUnit === 'kg' ? this.state.weight : this.state.weight / 2.20462;
+      }
+      
+      getAgentByName(name) {
+        return this.agents.find(a => a.name === name) || null;
+      }
+      
+      showError(message) {
+        this.elements.results.innerHTML = `<div class="error-message" role="alert">${message}</div>`;
+      }
+
+      isTumescentLidocaine(agent) {
+        return agent && (
+          agent.name.includes("Lidocaine 0.05%") || 
+          agent.name.includes("Lidocaine 0.1%")
+        );
+      }
+      
+      formatNumber(num, isVolume = false) {
+        if (isVolume && num >= 1000) {
+          // Convert to liters for large volumes
+          return (num / 1000).toLocaleString('en-US', { 
+            minimumFractionDigits: 1, 
+            maximumFractionDigits: 1 
+          }) + ' L';
+        }
+        
+        return num.toLocaleString('en-US', { 
+          minimumFractionDigits: 1, 
+          maximumFractionDigits: 1 
+        }) + (isVolume ? ' mL' : '');
+      }
+      
+      calculateMaxDose(agent, weight) {
+        // For tumescent lidocaine, use only the weight-based calculation when maxTotalMg is null
+        if (agent.maxTotalMg === null) {
+          return weight * agent.maxMgKg;
+        } 
+        // For standard formulations, use the lower of weight-based or absolute maximum
+        else {
+          return Math.min(weight * agent.maxMgKg, agent.maxTotalMg);
+        }
+      }
+      
+      calculateMaxVolume(agent, maxMg) {
+        // Avoid division by zero for "None" agent
+        if (agent.concentration <= 0) return 0;
+        
+        // Calculate max volume based on concentration
+        // For all lidocaine formulations: maxMg / (10 * concentration)
+        return maxMg / (10 * agent.concentration);
+      }
+      
+      // New function to calculate adjusted volume based on buffer
+      calculateBufferedVolume(maxMl, bufferRatio) {
+        if (bufferRatio === 'none') {
+          return maxMl;
+        }
+        
+        // Extract the numerical ratio from the buffer option
+        const ratio = parseInt(bufferRatio.split(':')[0], 10);
+        
+        // Calculate the total volume with buffer
+        // For a 10:1 ratio, each 10mL of anesthetic gets 1mL of buffer
+        // So for X mL of anesthetic, we add X/ratio mL of buffer
+        const bufferVolume = maxMl / ratio;
+        
+        // Return the total volume (anesthetic + buffer)
+        return maxMl + bufferVolume;
+      }
+      
+      resetChart() {
+        if (this.state.chartInstance) {
+          this.state.chartInstance.destroy();
+          this.state.chartInstance = null;
+        }
+      }
+      
+      getChartBaseOptions(isMobile = window.innerWidth < 768) {
+        const textColor = getComputedStyle(document.documentElement).getPropertyValue('--color-text');
+        
+        return {
+          responsive: true,
+          maintainAspectRatio: true,
+          aspectRatio: isMobile ? 1.25 : 2,
+          animation: {
+            duration: 750,
+            easing: 'easeOutQuart'
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                font: { size: isMobile ? 10 : 12 }
+              }
+            }
+          },
+          scales: {
+            y: {
+              min: 0,
+              ticks: {
+                color: textColor,
+                font: { size: isMobile ? 9 : 11 }
+              }
+            },
+            x: {
+              ticks: {
+                font: { size: isMobile ? 9 : 11 }
+              }
+            }
+          }
+        };
+      }
+      
+      getScaleOptions(title, max, isMobile = window.innerWidth < 768) {
+        return {
+          title: { 
+            display: true, 
+            text: title,
+            color: getComputedStyle(document.documentElement).getPropertyValue('--color-text'),
+            font: { size: isMobile ? 10 : 12 }
+          },
+          max: Math.ceil(max * 1.1),
+          ticks: { 
+            stepSize: Math.max(1, Math.floor(max / (isMobile ? 4 : 8)))
+          }
+        };
+      }
+      
+      updateChart(chartData) {
+        try {
+          this.resetChart();
+          
+          if (typeof Chart === 'undefined') return;
+          
+          const baseOptions = this.getChartBaseOptions();
+          const { type, options, data } = chartData;
+          
+          const mergedOptions = {
+            ...baseOptions,
+            ...options,
+            scales: {
+              ...baseOptions.scales,
+              ...(options.scales || {}),
+              y: {
+                ...baseOptions.scales.y,
+                ...(options.scales?.y || {})
+              },
+              x: {
+                ...baseOptions.scales.x,
+                ...(options.scales?.x || {})
+              }
+            },
+            plugins: {
+              ...baseOptions.plugins,
+              ...(options.plugins || {}),
+              legend: {
+                ...baseOptions.plugins.legend,
+                ...(options.plugins?.legend || {})
+              }
+            }
+          };
+          
+          this.state.chartInstance = new Chart(this.elements.chartCtx, {
+            type,
+            data,
+            options: mergedOptions
+          });
+        } catch (error) {
+          console.error('Chart creation error:', error);
+          this.showError(`Error creating chart: ${error.message || 'Unknown error'}`);
+        }
+      }
+      
+      getBufferLabel(bufferRatio) {
+        return bufferRatio === 'none' ? '' : ` (${bufferRatio} NaHCO₃)`;
+      }
+      
+      getBufferDisplayName(agentName, bufferRatio) {
+        return agentName + (bufferRatio === 'none' ? '' : ` + NaHCO₃ ${bufferRatio}`);
+      }
+      
+      createSingleAgentChartConfig(agent, maxMl, bufferRatio, bufferedMaxMl) {
+        const isMobile = window.innerWidth < 768;
+        const hasBuffer = bufferRatio !== 'none';
+        
+        const datasets = [{
+          label: `${agent.name} Maximum Dose`,
+          data: [maxMl],
+          backgroundColor: 'rgba(0, 114, 178, 0.7)',
+          borderColor: '#0072B2',
+          borderWidth: 1
+        }];
+        
+        if (hasBuffer) {
+          datasets[0].label = `${agent.name} Base Volume`;
+          
+          datasets.push({
+            label: `${agent.name} + Buffer (${bufferRatio})`,
+            data: [bufferedMaxMl],
+            backgroundColor: 'rgba(0, 158, 115, 0.7)',
+            borderColor: '#009E73',
+            borderWidth: 1
+          });
+        }
+        
+        return {
+          type: 'bar',
+          data: {
+            labels: ['Maximum Dose'],
+            datasets: datasets
+          },
+          options: {
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  label: (context) => `${context.raw.toFixed(1)} mL`
+                }
+              }
+            },
+            scales: {
+              y: this.getScaleOptions('Volume (mL)', hasBuffer ? bufferedMaxMl : maxMl, isMobile)
+            }
+          }
+        };
+      }
+      
+      createCombinationChartConfig(agent1, agent2, maxMl1, maxMl2, plannedDose2, plannedRemainingMl1, buffer1, buffer2, bufferedMaxMl1, bufferedMaxMl2, bufferedPlannedDose2) {
+        const isMobile = window.innerWidth < 768;
+        const hasBuffer1 = buffer1 !== 'none';
+        const hasBuffer2 = buffer2 !== 'none';
+        
+        // Calculate the ratio between base volume and max dose
+        const ratio = maxMl1 / maxMl2;
+        
+        // Generate data points for the curve (base volumes)
+        const interpolatedData = Array.from(
+          {length: Math.ceil(maxMl2) + 1}, 
+          (_, x) => ({x, y: Math.max(0, maxMl1 - ratio * x)})
+        );
+        
+        // If using buffers, calculate the corresponding buffered values
+        let bufferedInterpolatedData = [];
+        if (hasBuffer1 || hasBuffer2) {
+          const bufferRatio1 = hasBuffer1 ? parseInt(buffer1.split(':')[0], 10) : null;
+          const bufferRatio2 = hasBuffer2 ? parseInt(buffer2.split(':')[0], 10) : null;
+          
+          bufferedInterpolatedData = interpolatedData.map(point => {
+            const x = hasBuffer2 ? point.x * (1 + 1/bufferRatio2) : point.x;
+            const y = hasBuffer1 ? point.y * (1 + 1/bufferRatio1) : point.y;
+            return {x, y};
+          });
+        }
+        
+        const agent1Name = this.getBufferDisplayName(agent1.name, buffer1);
+        const agent2Name = this.getBufferDisplayName(agent2.name, buffer2);
+        
+        const datasets = [
+          {
+            label: isMobile ? `${agent1.name} Remaining` : `${agent1.name} Remaining vs ${agent2.name} Used`,
+            data: interpolatedData,
+            showLine: true,
+            borderColor: '#0072B2',
+            backgroundColor: 'rgba(0, 114, 178, 0.1)',
+            fill: true,
+            pointRadius: 0,
+            tension: 0
+          }
+        ];
+        
+        // Add buffered curve if using buffers
+        if (hasBuffer1 || hasBuffer2) {
+          datasets.push({
+            label: isMobile ? `${agent1Name} Remaining` : `${agent1Name} Remaining vs ${agent2Name} Used`,
+            data: bufferedInterpolatedData,
+            showLine: true,
+            borderColor: '#009E73',
+            backgroundColor: 'rgba(0, 158, 115, 0.1)',
+            fill: true,
+            pointRadius: 0,
+            tension: 0
+          });
+        }
+        
+        // Target point
+        datasets.push({
+          label: 'Target Point',
+          data: [{ 
+            x: hasBuffer2 ? bufferedPlannedDose2 : plannedDose2, 
+            y: hasBuffer1 ? this.calculateBufferedVolume(plannedRemainingMl1, buffer1) : plannedRemainingMl1 
+          }],
+          pointBackgroundColor: '#D55E00',
+          pointBorderColor: '#D55E00',
+          pointRadius: isMobile ? 6 : 8,
+          pointHoverRadius: isMobile ? 8 : 10
+        });
+        
+        // Reference line
+        datasets.push({
+          label: 'Reference Line',
+          data: [
+            { 
+              x: hasBuffer2 ? bufferedPlannedDose2 : plannedDose2, 
+              y: 0 
+            },
+            { 
+              x: hasBuffer2 ? bufferedPlannedDose2 : plannedDose2, 
+              y: hasBuffer1 ? this.calculateBufferedVolume(plannedRemainingMl1, buffer1) : plannedRemainingMl1 
+            }
+          ],
+          borderColor: '#D55E00',
+          borderDash: [5, 5],
+          borderWidth: 2,
+          pointRadius: 0,
+          showLine: true,
+          fill: false
+        });
+        
+        return {
+          type: 'scatter',
+          data: {
+            datasets: datasets
+          },
+          options: {
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  title: () => 'Target Dose Point',
+                  label: (context) => {
+                    if (context.datasetIndex === (hasBuffer1 || hasBuffer2 ? 2 : 1)) {
+                      return [
+                        `${agent2Name}: ${(hasBuffer2 ? bufferedPlannedDose2 : plannedDose2).toFixed(1)} mL used`,
+                        `${agent1Name}: ${(hasBuffer1 ? this.calculateBufferedVolume(plannedRemainingMl1, buffer1) : plannedRemainingMl1).toFixed(1)} mL remaining`
+                      ];
+                    }
+                    return `${agent1Name} Remaining: ${context.raw.y.toFixed(1)} mL`;
+                  }
+                }
+              },
+              legend: {
+                labels: {
+                  filter: (item) => item.text !== 'Target Point' && item.text !== 'Reference Line'
+                }
+              }
+            },
+            scales: {
+              x: this.getScaleOptions(
+                isMobile ? `${agent2Name} Used` : `${agent2Name} Used (mL)`,
+                hasBuffer2 ? bufferedMaxMl2 : maxMl2, 
+                isMobile
+              ),
+              y: this.getScaleOptions(
+                isMobile ? `${agent1Name} Remaining` : `${agent1Name} Remaining (mL)`,
+                hasBuffer1 ? bufferedMaxMl1 : maxMl1,
+                isMobile
+              )
+            }
+          }
+        };
+      }
+      
+      generateCombinedPrimaryCard(name, maxMg, maxMl, syringes, bufferRatio, bufferedMaxMl = null, remainingInfo = null) {
+        const hasBuffer = bufferRatio !== 'none';
+        const isTumescent = this.isTumescentLidocaine({name});
+        
+        let html = `
+          <div class="result-card primary-agent">
+            <div class="card-content">
+              <div class="card-title">
+                <span class="agent-label">FIRST AGENT</span>
+                <span class="agent-name">${name}${hasBuffer ? '<span class="buffer-label">' + bufferRatio + ' NaHCO₃</span>' : ''}</span>
+              </div>
+              <div class="metric-container">
+                <div class="metric">
+                  <span class="metric-icon">💊</span>
+                  <span class="metric-value">${this.formatNumber(maxMg)} mg</span>
+                  <span class="metric-label">MAX</span>
+                </div>`;
+                
+        // Only show base volume when no buffer is selected
+        if (!hasBuffer) {
+          html += `
+                <div class="metric">
+                  <span class="metric-icon">💉</span>
+                  <span class="metric-value">${this.formatNumber(maxMl, true)}</span>
+                  <span class="metric-label">BASE VOLUME</span>
+                </div>`;
+        }
+                
+        if (hasBuffer) {
+          html += `
+                <div class="metric">
+                  <span class="metric-icon">🧪</span>
+                  <span class="metric-value">${this.formatNumber(bufferedMaxMl, true)}</span>
+                  <span class="metric-label">WITH BUFFER</span>
+                </div>`;
+        }
+                
+        // Only show syringes if not tumescent lidocaine
+        if (!isTumescent) {
+          // Use buffered volume for syringe calculation when buffer is selected
+          const volumeForSyringes = hasBuffer ? bufferedMaxMl : maxMl;
+          html += `
+                <div class="metric">
+                  <span class="metric-icon">🔄</span>
+                  <span class="metric-value">${this.formatNumber(volumeForSyringes / this.SYRINGE_VOLUME)} x ${this.SYRINGE_VOLUME}mL</span>
+                  <span class="metric-label">SYRINGE(S)</span>
+                </div>`;
+        }
+        
+        html += `
+              </div>
+            </div>`;
+            
+        if (remainingInfo) {
+          html += `
+            <div class="info-text">${remainingInfo.info}</div>
+            <div class="card-content">
+              <div class="card-title">
+                <span class="agent-label" style="background-color: #D55E00;">REMAINING</span>
+                <span class="agent-name">${name}${hasBuffer ? '<span class="buffer-label">' + bufferRatio + ' NaHCO₃</span>' : ''}</span>
+              </div>
+              <div class="metric-container">
+                <div class="metric">
+                  <span class="metric-icon">💊</span>
+                  <span class="metric-value">${this.formatNumber(remainingInfo.maxMg)} mg</span>
+                  <span class="metric-label">REMAINING</span>
+                </div>`;
+                
+          // Only show base volume when no buffer is selected
+          if (!hasBuffer) {
+            html += `
+                <div class="metric">
+                  <span class="metric-icon">💉</span>
+                  <span class="metric-value">${this.formatNumber(remainingInfo.maxMl, true)}</span>
+                  <span class="metric-label">FINAL VOLUME</span>
+                </div>`;
+          }
+                
+          if (hasBuffer) {
+            html += `
+                <div class="metric">
+                  <span class="metric-icon">🧪</span>
+                  <span class="metric-value">${this.formatNumber(remainingInfo.bufferedMaxMl, true)}</span>
+                  <span class="metric-label">FINAL VOLUME</span>
+                </div>`;
+          }
+                
+          // Only show remaining syringes if not tumescent lidocaine
+          if (!isTumescent) {
+            // Use buffered volume for remaining syringe calculation when buffer is selected
+            const remainingVolumeForSyringes = hasBuffer ? remainingInfo.bufferedMaxMl : remainingInfo.maxMl;
+            html += `
+                <div class="metric">
+                  <span class="metric-icon">🔄</span>
+                  <span class="metric-value">${this.formatNumber(remainingVolumeForSyringes / this.SYRINGE_VOLUME)} x ${this.SYRINGE_VOLUME}mL</span>
+                  <span class="metric-label">SYRINGE(S)</span>
+                </div>`;
+          }
+          
+          html += `
+              </div>
+            </div>`;
+        }
+        
+        html += `</div>`;
+        return html;
+      }
+      
+      generateSecondaryCard(name, maxMg, maxMl, syringes, bufferRatio, bufferedMaxMl = null) {
+        const hasBuffer = bufferRatio !== 'none';
+        const isTumescent = this.isTumescentLidocaine({name});
+        
+        // Use buffered volume for syringe calculation when buffer is selected
+        const volumeForSyringes = hasBuffer ? bufferedMaxMl : maxMl;
+        
+        let html = `
+          <div class="result-card secondary-agent">
+            <div class="card-content">
+              <div class="card-title">
+                <span class="agent-label">SECOND AGENT</span>
+                <span class="agent-name">${name}${hasBuffer ? '<span class="buffer-label">' + bufferRatio + ' NaHCO₃</span>' : ''}</span>
+              </div>
+              <div class="metric-container">
+                <div class="metric">
+                  <span class="metric-icon">💊</span>
+                  <span class="metric-value">${this.formatNumber(maxMg)} mg</span>
+                  <span class="metric-label">MAX</span>
+                </div>
+                ${!hasBuffer ? `
+                <div class="metric">
+                  <span class="metric-icon">💉</span>
+                  <span class="metric-value">${this.formatNumber(maxMl, true)}</span>
+                  <span class="metric-label">BASE VOLUME</span>
+                </div>` : ''}
+                ${hasBuffer ? `
+                <div class="metric">
+                  <span class="metric-icon">🧪</span>
+                  <span class="metric-value">${this.formatNumber(bufferedMaxMl, true)}</span>
+                  <span class="metric-label">WITH BUFFER</span>
+                </div>` : ''}`;
+                
+        // Only show syringes if not tumescent lidocaine
+        if (!isTumescent) {
+          html += `
+                <div class="metric">
+                  <span class="metric-icon">🔄</span>
+                  <span class="metric-value">${this.formatNumber(volumeForSyringes / this.SYRINGE_VOLUME)} x ${this.SYRINGE_VOLUME}mL</span>
+                  <span class="metric-label">SYRINGE(S)</span>
+                </div>`;
+        }
+        
+        html += `
+              </div>
+            </div>
+          </div>`;
+          
+        return html;
+      }
+      
+      calculateDoses() {
+        try {
+          const weight = this.getWeightKg();
+          if (weight <= 0) {
+            this.elements.weight.classList.add('invalid-input');
+            return;
+          }
+          
+          const agent1 = this.getAgentByName(this.state.agent1);
+          if (!agent1) {
+            this.showError('Please select a valid first agent');
+            return;
+          }
+          
+          const maxMg1 = this.calculateMaxDose(agent1, weight);
+          const maxMl1 = this.calculateMaxVolume(agent1, maxMg1);
+          const buffer1 = this.state.buffer1;
+          const bufferedMaxMl1 = this.calculateBufferedVolume(maxMl1, buffer1);
+          
+          const isMobile = window.innerWidth <= 768;
+          let resultsHTML = '';
+          
+          const agent2 = this.getAgentByName(this.state.agent2);
+          if (!agent2 || agent2.name === "None") {
+            const chartConfig = this.createSingleAgentChartConfig(agent1, maxMl1, buffer1, bufferedMaxMl1);
+            this.updateChart(chartConfig);
+            
+            resultsHTML = this.generateCombinedPrimaryCard(
+              agent1.name, maxMg1, maxMl1, maxMl1 / this.SYRINGE_VOLUME, buffer1, bufferedMaxMl1
+            );
+          } else {
+            const plannedDose2 = this.state.plannedDose2;
+            const maxMg2 = this.calculateMaxDose(agent2, weight);
+            const maxMl2 = this.calculateMaxVolume(agent2, maxMg2);
+            const buffer2 = this.state.buffer2;
+            const bufferedMaxMl2 = this.calculateBufferedVolume(maxMl2, buffer2);
+            const bufferedPlannedDose2 = this.calculateBufferedVolume(plannedDose2, buffer2);
+            
+            if (maxMl2 <= 0) {
+              this.showError(`Cannot calculate combination - maximum dose for ${agent2.name} is zero. Please select a different agent.`);
+              return;
+            }
+            
+            const plannedRemainingMg1 = maxMg1 * (1 - plannedDose2 / maxMl2);
+            const plannedRemainingMl1 = this.calculateMaxVolume(agent1, plannedRemainingMg1);
+            const bufferedRemainingMl1 = this.calculateBufferedVolume(plannedRemainingMl1, buffer1);
+            
+            if (!isMobile) {
+              resultsHTML = '<div class="result-column">';
+            }
+            
+            if (plannedDose2 <= maxMl2) {
+              const remainingInfo = {
+                maxMg: plannedRemainingMg1,
+                maxMl: plannedRemainingMl1,
+                bufferedMaxMl: bufferedRemainingMl1,
+                info: `After ${this.formatNumber(plannedDose2)} mL of ${agent2.name}${buffer2 !== 'none' ? ' (' + this.formatNumber(bufferedPlannedDose2) + ' mL with buffer)' : ''}`
+              };
+              
+              resultsHTML += this.generateCombinedPrimaryCard(
+                agent1.name, maxMg1, maxMl1, maxMl1 / this.SYRINGE_VOLUME, 
+                buffer1, bufferedMaxMl1, remainingInfo
+              );
+              
+              if (!isMobile) {
+                resultsHTML += '</div><div class="result-column">';
+              }
+              
+              resultsHTML += this.generateSecondaryCard(
+                agent2.name, maxMg2, maxMl2, maxMl2 / this.SYRINGE_VOLUME,
+                buffer2, bufferedMaxMl2
+              );
+              
+              const chartConfig = this.createCombinationChartConfig(
+                agent1, agent2, maxMl1, maxMl2, 
+                Math.min(plannedDose2, maxMl2), 
+                Math.max(0, plannedRemainingMl1),
+                buffer1, buffer2,
+                bufferedMaxMl1, bufferedMaxMl2,
+                Math.min(bufferedPlannedDose2, bufferedMaxMl2)
+              );
+              this.updateChart(chartConfig);
+              
+            } else {
+              resultsHTML += this.generateCombinedPrimaryCard(
+                agent1.name, maxMg1, maxMl1, maxMl1 / this.SYRINGE_VOLUME,
+                buffer1, bufferedMaxMl1
+              );
+              
+              if (!isMobile) {
+                resultsHTML += '</div><div class="result-column">';
+              }
+              
+              resultsHTML += this.generateSecondaryCard(
+                agent2.name, maxMg2, maxMl2, maxMl2 / this.SYRINGE_VOLUME,
+                buffer2, bufferedMaxMl2
+              );
+              
+              resultsHTML += `
+                <div class="error-message" role="alert">
+                  Planned dose of ${this.formatNumber(plannedDose2)} mL exceeds maximum dose of ${this.formatNumber(maxMl2)} mL for ${agent2.name}.
+                </div>
+              `;
+            }
+            
+            if (!isMobile) {
+              resultsHTML += '</div>';
+            }
+          }
+          
+          this.elements.results.innerHTML = resultsHTML;
+        } catch (error) {
+          console.error('Calculation error:', error);
+          const errorMessage = error.message || 'Please check your inputs.';
+          this.showError(`Error calculating doses: ${errorMessage}`);
+        }
+      }
+    }
+  </script>
+</body>
+</html>
