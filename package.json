@@ -1,0 +1,30 @@
+{
+  "name": "anesthesia-calculator",
+  "version": "1.0.0",
+  "description": "Local Anesthesia Dose Calculator",
+  "author": "Nicholas Flint",
+  "main": "main.js",
+  "scripts": {
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^latest",
+    "electron-builder": "^latest"
+  },
+  "build": {
+    "appId": "com.yourname.anesthesia-calculator",
+    "productName": "Anesthesia Calculator",
+    "directories": {
+      "output": "dist"
+    },
+    "mac": {
+      "category": "public.app-category.medical"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  }
+}
